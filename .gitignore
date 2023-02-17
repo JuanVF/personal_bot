@@ -1,2 +1,8 @@
+# Personal Bot Service
 common/local.yaml
 *.exe
+
+# Migration Files
+db/node_modules/
+db/database.json
+db/docker-compose.yaml
