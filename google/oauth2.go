@@ -7,19 +7,17 @@ import (
 	"github.com/monaco-io/request"
 )
 
-var config *common.Configuration = common.GetConfig()
-
 // Given the user code, it will get the credentials information
 func GetAccessToken(code string) (*OAuth2Response, error) {
 	client := request.Client{
-		URL:    fmt.Sprintf("%s/token", config.Gmail.BaseURL),
+		URL:    fmt.Sprintf("%s/token", config.Google.OAuthURL),
 		Method: "POST",
 		Query: map[string]string{
-			"client_id":     config.Gmail.ClientId,
-			"client_secret": config.Gmail.Secret,
+			"client_id":     config.Google.ClientId,
+			"client_secret": config.Google.Secret,
 			"grant_type":    "authorization_code",
 			"code":          code,
-			"redirect_uri":  config.Gmail.RedirectURI,
+			"redirect_uri":  config.Google.RedirectURI,
 		},
 	}
 
@@ -43,11 +41,11 @@ func GetAccessToken(code string) (*OAuth2Response, error) {
 // Given a Refresh Token it will return the credentials information
 func RefreshToken(refreshToken string) (*OAuth2Response, error) {
 	client := request.Client{
-		URL:    fmt.Sprintf("%s/token", config.Gmail.BaseURL),
+		URL:    fmt.Sprintf("%s/token", config.Google.OAuthURL),
 		Method: "POST",
 		Query: map[string]string{
-			"client_id":     config.Gmail.ClientId,
-			"client_secret": config.Gmail.Secret,
+			"client_id":     config.Google.ClientId,
+			"client_secret": config.Google.Secret,
 			"grant_type":    "refresh_token",
 			"refresh_token": refreshToken,
 		},

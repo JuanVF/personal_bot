@@ -7,3 +7,14 @@ type OAuth2Response struct {
 	TokenType    string `json:"token_type"`
 	RefreshToken string `json:"refresh_token"`
 }
+
+type GmailThreads struct {
+	Messages           []GmailThreadIdentifier `json:"messages"`
+	NextPageToken      string                  `json:"nextPageToken"`
+	ResultSizeEstimate int                     `json:"resultSizeEstimate"`
+}
+
+type GmailThreadIdentifier struct {
+	Id       string `json:"id"`
+	ThreadId string `json:"threadId"`
+}
