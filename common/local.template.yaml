@@ -1,0 +1,6 @@
+---
+gmail:
+  base_url: https://oauth2.googleapis.com/
+  client_id: --Replace this by your Client--
+  secret: --Replace this by your secret--
+  redirect_uri: http://localhost:3000
