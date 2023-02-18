@@ -7,3 +7,9 @@ google:
   redirect_uri: http://localhost:3000
 bot:
   read_from: 2023-02-20T00:00:00.000Z
+personal_bot_db:
+  host: localhost
+  port: 5438
+  user: --Replace this by your user--
+  password: --Replace this by your password--
+  dbname: postgres
