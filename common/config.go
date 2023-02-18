@@ -1,8 +1,8 @@
 package common
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,7 +16,7 @@ func GetConfig() *Configuration {
 		yamlFile, err := ioutil.ReadFile(configPath)
 
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			GetLogger().Error("Config", fmt.Sprintf("yamlFile.Get err   #%v ", err))
 		}
 
 		config = &Configuration{}
@@ -24,7 +24,7 @@ func GetConfig() *Configuration {
 		err = yaml.Unmarshal(yamlFile, config)
 
 		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+			GetLogger().Error("Config", fmt.Sprintf("Unmarshal: %v", err))
 		}
 	}
 

@@ -13,3 +13,4 @@ personal_bot_db:
   user: --Replace this by your user--
   password: --Replace this by your password--
   dbname: postgres
+  ssl_mode: disable
