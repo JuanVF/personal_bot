@@ -1,0 +1,1 @@
+INSERT INTO personal_bot.t_currencies(name) VALUES ('CRC'), ('USD');
