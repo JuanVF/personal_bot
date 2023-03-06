@@ -11,10 +11,12 @@ import (
 
 var authPrefix string = "/auth"
 
+// Register all the auth routes
 func HandleAuthRoutes() {
 	router.HandleFunc(fmt.Sprintf("%s/token", authPrefix), GetToken).Methods("GET")
 }
 
+// Get Token End Point will request an access token with a code
 func GetToken(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
 	code := values.Get("code")

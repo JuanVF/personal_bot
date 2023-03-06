@@ -11,6 +11,7 @@ type GetTokenBody struct {
 	Code string
 }
 
+// Service to retrieve an access token
 func GetToken(body *GetTokenBody) *common.Response {
 	var response *common.Response = &common.Response{
 		Status: http.StatusOK,

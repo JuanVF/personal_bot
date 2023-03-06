@@ -61,7 +61,7 @@ func (l *Logger) Log(section, message string) {
 	fmt.Printf("%s[%s%s%s][%s%s%s]:%s %s\n", greenBold, yellowBold, l.headline, greenBold, yellowBold, section, greenBold, normalWhite, message)
 }
 
-// Logs a message
+// Logs an object message
 func (l *Logger) LogObject(section, object any) {
 	greenBold := l.getColor(STYLE_BOLD, COLOR_GREEN, BG_BLACK)
 	green := l.getColor(STYLE_NO_EFFECT, COLOR_GREEN, BG_BLACK)
