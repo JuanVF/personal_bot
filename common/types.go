@@ -36,3 +36,12 @@ type Logger struct {
 type DB struct {
 	connection *sql.DB
 }
+
+type Response struct {
+	Status int
+	Body   any
+}
+
+type ErrorResponse struct {
+	Message string
+}

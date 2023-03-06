@@ -47,3 +47,12 @@ type GmailMessageHeader struct {
 type GmailMessageBody struct {
 	Size int `json:"size"`
 }
+
+type VerifyTokenResponse struct {
+	Azp        string `json:"azp"`
+	Aud        string `json:"aud"`
+	Scope      string `json:"scope"`
+	Exp        string `json:"exp"`
+	ExpiresIn  string `json:"expires_in"`
+	AccessType string `json:"access_type"`
+}

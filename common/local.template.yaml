@@ -4,7 +4,7 @@ google:
   gmail_url: https://gmail.googleapis.com
   client_id: --Replace this by your Client--
   secret: --Replace this by your secret--
-  redirect_uri: http://localhost:3000
+  redirect_uri: http://localhost:3000/auth/token
 bot:
   read_from: 2023-02-20T00:00:00.000Z
 personal_bot_db:

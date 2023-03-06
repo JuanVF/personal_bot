@@ -1,6 +1,9 @@
 package common
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Singleton object for the logger
 var logger *Logger = nil
@@ -56,6 +59,23 @@ func (l *Logger) Log(section, message string) {
 	normalWhite := l.getColor(STYLE_NO_EFFECT, COLOR_WHITE, BG_BLACK)
 
 	fmt.Printf("%s[%s%s%s][%s%s%s]:%s %s\n", greenBold, yellowBold, l.headline, greenBold, yellowBold, section, greenBold, normalWhite, message)
+}
+
+// Logs a message
+func (l *Logger) LogObject(section, object any) {
+	greenBold := l.getColor(STYLE_BOLD, COLOR_GREEN, BG_BLACK)
+	green := l.getColor(STYLE_NO_EFFECT, COLOR_GREEN, BG_BLACK)
+	yellowBold := l.getColor(STYLE_BOLD, COLOR_YELLOW, BG_BLACK)
+	normalWhite := l.getColor(STYLE_NO_EFFECT, COLOR_WHITE, BG_BLACK)
+
+	b, err := json.MarshalIndent(object, "", "\t")
+
+	if err != nil {
+		l.Error("Logger", err.Error())
+		return
+	}
+
+	fmt.Printf("%s[%s%s%s][%s%s%s]:%s \n%s%s%s\n", greenBold, yellowBold, l.headline, greenBold, yellowBold, section, greenBold, normalWhite, green, b, normalWhite)
 }
 
 // Prints a bracketed message

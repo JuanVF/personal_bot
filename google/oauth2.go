@@ -67,3 +67,25 @@ func RefreshToken(refreshToken string) (*OAuth2Response, error) {
 
 	return result, nil
 }
+
+// Given a Token it will verify if the token is valid
+func IsValidToken(token string) bool {
+	client := request.Client{
+		URL:    fmt.Sprintf("%s/tokeninfo", config.Google.OAuthURL),
+		Method: "GET",
+		Query: map[string]string{
+			"access_token": token,
+		},
+	}
+
+	var result *OAuth2Response = &OAuth2Response{}
+
+	resp := client.Send().Scan(&result)
+
+	if !resp.OK() {
+		common.GetLogger().Error("Google-OAuth2.0", resp.Error().Error())
+		return false
+	}
+
+	return resp.Response().StatusCode == 200
+}
