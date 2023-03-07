@@ -6,6 +6,23 @@ type Configuration struct {
 	Google        GoogleConf        `yaml:"google"`
 	Bot           BotConf           `yaml:"bot"`
 	PersonalBotDB PersonalBotDBConf `yaml:"personal_bot_db"`
+	OpenAI        OpenAIConfig      `yaml:"open_ai"`
+}
+
+type OpenAIConfig struct {
+	OpenAIAPI       string               `yaml:"open_ai_api"`
+	SecretKey       string               `yaml:"secret_key"`
+	FinedTunedModel string               `yaml:"fined_tuned_model"`
+	CompleteParams  OpenAICompleteParams `yaml:"complete_params"`
+}
+
+type OpenAICompleteParams struct {
+	MaxTokens        int     `yaml:"max_tokens"`
+	Temperature      float64 `yaml:"temperature"`
+	TopP             int     `yaml:"top_p"`
+	N                int     `yaml:"n"`
+	FrequencyPenalty int     `yaml:"frequency_penalty"`
+	PresencePenalty  int     `yaml:"presence_penalty"`
 }
 
 type PersonalBotDBConf struct {
