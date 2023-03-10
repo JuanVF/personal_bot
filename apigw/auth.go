@@ -25,8 +25,6 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 		Code: code,
 	}
 
-	logger.LogObject("APIGW - Get Token", *body)
-
 	resp := services.GetToken(body)
 
 	if resp.Status != 200 {
