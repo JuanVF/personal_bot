@@ -1,0 +1,1 @@
+ALTER TABLE ONLY personal_bot.t_bots ADD COLUMN last_payment_id INT;
