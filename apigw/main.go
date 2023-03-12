@@ -14,6 +14,7 @@ func Start() {
 	router = mux.NewRouter()
 
 	HandleAuthRoutes()
+	HandlePaymentRoutes()
 
 	http.Handle("/", router)
 

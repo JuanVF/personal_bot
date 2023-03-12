@@ -27,10 +27,7 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 
 	resp := services.GetToken(body)
 
-	if resp.Status != 200 {
-		http.Error(w, "", resp.Status)
-	}
-
+	w.WriteHeader(resp.Status)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp.Body)
 }
@@ -38,8 +35,7 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 // Middleware to verify the access token send by the user
 func VerifyTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		Header := w.Header()
-		token := Header.Get("Authorization")
+		token := r.Header.Get("Authorization")
 
 		isValidToken := google.IsValidToken(token)
 

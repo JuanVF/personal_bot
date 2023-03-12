@@ -5,8 +5,14 @@ type Currency struct {
 	Name string
 }
 
+var currenciesCache []*Currency = make([]*Currency, 0)
+
 // Query all the currencies from the DB
 func GetCurrencies() ([]*Currency, error) {
+	if len(currenciesCache) != 0 {
+		return currenciesCache, nil
+	}
+
 	statement := "SELECT id, name FROM personal_bot.t_currencies"
 
 	rows, err := db.GetConnection().Query(statement)
@@ -31,5 +37,24 @@ func GetCurrencies() ([]*Currency, error) {
 		currencies = append(currencies, &currency)
 	}
 
+	currenciesCache = currencies
+
 	return currencies, nil
+}
+
+// Return a currency by its name
+func GetCurrencyByName(name string) *Currency {
+	currencies, err := GetCurrencies()
+
+	if err != nil {
+		return nil
+	}
+
+	for _, c := range currencies {
+		if c.Name == name {
+			return c
+		}
+	}
+
+	return nil
 }

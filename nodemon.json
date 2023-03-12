@@ -1,0 +1,27 @@
+{
+    "restartable": "rs",
+    "ignore": [
+        ".git"
+    ],
+    "verbose": true,
+    "execMap": {
+        "js": "node --harmony"
+    },
+    "events": {
+        "restart": "go run . --signal SIGTERM"
+    },
+    "watch": [
+        "apigw/",
+        "bank/",
+        "common/",
+        "google/",
+        "openai/",
+        "repositories/",
+        "services/",
+        "main.go"
+    ],
+    "env": {
+        "NODE_ENV": "development"
+    },
+    "ext": "go,json"
+}

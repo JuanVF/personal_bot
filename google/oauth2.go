@@ -1,10 +1,12 @@
 package google
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/JuanVF/personal_bot/common"
 	"github.com/monaco-io/request"
+	"google.golang.org/api/idtoken"
 )
 
 // Given the user code, it will get the credentials information
@@ -78,7 +80,7 @@ func IsValidToken(token string) bool {
 		},
 	}
 
-	var result *OAuth2Response = &OAuth2Response{}
+	var result *VerifyTokenResponse = &VerifyTokenResponse{}
 
 	resp := client.Send().Scan(&result)
 
@@ -88,4 +90,17 @@ func IsValidToken(token string) bool {
 	}
 
 	return resp.Response().StatusCode == 200
+}
+
+// Returns the payload from an ID Token
+func GetPayloadFromIDToken(idToken string) (*idtoken.Payload, error) {
+	payload, err := idtoken.Validate(context.Background(), idToken, config.Google.ClientId)
+
+	if err != nil {
+		common.GetLogger().Error("Google-OAuth2.0", err.Error())
+
+		return nil, err
+	}
+
+	return payload, nil
 }

@@ -3,7 +3,9 @@ CREATE TABLE personal_bot.t_payments (
     amount NUMERIC(15, 2) NOT NULL,
     last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     user_id INT NOT NULL,
-    currency_id INT NOT NULL
+    currency_id INT NOT NULL,
+    dolar_price NUMERIC(15, 2) NOT NULL,
+    tags JSON NOT NULL
 );
 
 ALTER TABLE ONLY personal_bot.t_payments ADD CONSTRAINT t_payments_pkey PRIMARY KEY(id);

@@ -1,7 +1,8 @@
 CREATE TABLE personal_bot.t_bots (
     id SERIAL,
     user_id INT NOT NULL,
-    last_thread_id TEXT
+    last_gmail_id TEXT,
+    last_payment_id INT
 );
 
 ALTER TABLE ONLY personal_bot.t_bots ADD CONSTRAINT t_bots_pkey PRIMARY KEY(id);

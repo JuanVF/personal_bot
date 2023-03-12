@@ -53,3 +53,20 @@ func GetUser(id int) (*User, error) {
 
 	return &user, nil
 }
+
+// Returns a single user from DB
+func GetUserByGoogleMe(email string) (*User, error) {
+	var user User = User{}
+
+	statement := "SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE google_me = $1"
+
+	err := db.GetConnection().QueryRow(statement, email).Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated)
+
+	if err != nil {
+		logger.Error("User Repository - Get User By Google Me", err.Error())
+
+		return nil, err
+	}
+
+	return &user, nil
+}
