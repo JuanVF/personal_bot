@@ -8,16 +8,22 @@ import (
 	"github.com/JuanVF/personal_bot/services"
 )
 
-var paymentPrefix string = "/payments"
+type PaymentRouter struct {
+}
 
 // Register all the payment routes
-func HandlePaymentRoutes() {
-	router.HandleFunc(fmt.Sprintf("%s/generate", paymentPrefix), VerifyTokenMiddleware(GeneratePayments)).Methods("POST")
-	router.HandleFunc(fmt.Sprintf("%s", paymentPrefix), VerifyTokenMiddleware(GetPayments)).Methods("POST")
+func (payment PaymentRouter) Handle() {
+	router.HandleFunc(fmt.Sprintf("%s/generate", payment.GetPrefix()), VerifyTokenMiddleware(payment.GeneratePayments)).Methods("POST")
+	router.HandleFunc(fmt.Sprintf("%s", payment.GetPrefix()), VerifyTokenMiddleware(payment.GetPayments)).Methods("POST")
+}
+
+// Returns the payment prefix
+func (payment PaymentRouter) GetPrefix() string {
+	return "/payments"
 }
 
 // Populates the latest payments in DB
-func GeneratePayments(w http.ResponseWriter, r *http.Request) {
+func (payment PaymentRouter) GeneratePayments(w http.ResponseWriter, r *http.Request) {
 	logger.Log("APIGW", "[POST] /payments/generate")
 
 	var body *services.GeneratePaymentsBody = &services.GeneratePaymentsBody{}
@@ -32,13 +38,11 @@ func GeneratePayments(w http.ResponseWriter, r *http.Request) {
 
 	resp := services.GeneratePayments(body)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.Status)
-	json.NewEncoder(w).Encode(resp.Body)
+	writeResponse(w, resp)
 }
 
 // Returns the payments for a certain user using its token id
-func GetPayments(w http.ResponseWriter, r *http.Request) {
+func (payment PaymentRouter) GetPayments(w http.ResponseWriter, r *http.Request) {
 	logger.Log("APIGW", "[POST] /payments")
 
 	var body *services.GetPaymentsBody = &services.GetPaymentsBody{}
@@ -51,7 +55,5 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 
 	resp := services.GetPaymentsByTokenId(body)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.Status)
-	json.NewEncoder(w).Encode(resp.Body)
+	writeResponse(w, resp)
 }

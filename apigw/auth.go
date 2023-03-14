@@ -1,23 +1,29 @@
 package apigw
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/JuanVF/personal_bot/google"
 	"github.com/JuanVF/personal_bot/services"
 )
 
-var authPrefix string = "/auth"
+type AuthRoute struct {
+}
 
 // Register all the auth routes
-func HandleAuthRoutes() {
-	router.HandleFunc(fmt.Sprintf("%s/token", authPrefix), GetToken).Methods("GET")
+func (auth AuthRoute) Handle() {
+	router.HandleFunc(fmt.Sprintf("%s/token", auth.GetPrefix()), auth.GetToken).Methods("GET")
+}
+
+// Returns the prefix for this Handler
+func (auth AuthRoute) GetPrefix() string {
+	return "/auth"
 }
 
 // Get Token End Point will request an access token with a code
-func GetToken(w http.ResponseWriter, r *http.Request) {
+func (auth AuthRoute) GetToken(w http.ResponseWriter, r *http.Request) {
+	logger.Log("APIGW", "[POST] /auth")
+
 	values := r.URL.Query()
 	code := values.Get("code")
 
@@ -27,24 +33,5 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 
 	resp := services.GetToken(body)
 
-	w.WriteHeader(resp.Status)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp.Body)
-}
-
-// Middleware to verify the access token send by the user
-func VerifyTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-
-		isValidToken := google.IsValidToken(token)
-
-		if !isValidToken {
-			http.Error(w, "Invalid Google OAuth 2.0 Access Token", http.StatusUnauthorized)
-
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	}
+	writeResponse(w, resp)
 }

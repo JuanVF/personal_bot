@@ -13,8 +13,13 @@ var logger *common.Logger = common.GetLogger()
 func Start() {
 	router = mux.NewRouter()
 
-	HandleAuthRoutes()
-	HandlePaymentRoutes()
+	routers := []RouterHandler{
+		AuthRoute{}, PaymentRouter{},
+	}
+
+	for _, r := range routers {
+		r.Handle()
+	}
 
 	http.Handle("/", router)
 
