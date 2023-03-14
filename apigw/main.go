@@ -14,7 +14,7 @@ func Start() {
 	router = mux.NewRouter()
 
 	routers := []RouterHandler{
-		AuthRoute{}, PaymentRouter{},
+		AuthRoute{}, PaymentRouter{}, UserRouter{},
 	}
 
 	for _, r := range routers {

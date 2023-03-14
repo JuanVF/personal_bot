@@ -6,7 +6,7 @@ google:
   secret: --Replace this by your secret--
   redirect_uri: http://localhost:3000/auth/token
 open_ai:
-  open_ai_api : https://api.openai.com
+  open_ai_api: https://api.openai.com
   secret_key: --Replace this by your OpenAI key--
   fined_tuned_model: --Replace this by your Fined Tuned Model--
   complete_params:
@@ -20,7 +20,7 @@ bot:
   read_from: 2023-02-20T00:00:00.000Z
 personal_bot_db:
   host: localhost
-  port: 5438
+  port: 5432
   user: --Replace this by your user--
   password: --Replace this by your password--
   dbname: postgres

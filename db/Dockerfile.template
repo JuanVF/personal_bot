@@ -1,0 +1,9 @@
+FROM postgres:13.4
+
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD YOUR_PASSWORD
+ENV POSTGRES_DB postgres
+
+COPY ./migrations /docker-entrypoint-initdb.d/
+
+EXPOSE 5432

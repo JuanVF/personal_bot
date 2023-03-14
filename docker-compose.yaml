@@ -1,0 +1,14 @@
+services:
+  personal_bot:
+    build: .
+    depends_on:
+      - personal_bot_db
+    ports:
+      - "3000:3000"
+    links:
+      - "personal_bot_db:database"
+  personal_bot_db:
+    build: ./db/.
+    restart: always
+    ports:
+      - "5432:5432"
