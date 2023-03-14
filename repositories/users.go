@@ -78,18 +78,21 @@ func GetUserByGoogleMe(email string) (*User, error) {
 }
 
 // Creates an user in DB
-func CreateUser(user *CreateUserBody) error {
+func CreateUser(user *CreateUserBody) (int, error) {
 	statement := `INSERT INTO personal_bot.t_users(
 					name, last_name, google_me, last_updated)
 				VALUES 
 					($1, $2, $3, NOW()) 
 				RETURNING id`
 
-	_, err := db.GetConnection().Exec(statement, user.Name, user.LastName, user.GoogleMe)
+	var id int
+	err := db.GetConnection().QueryRow(statement, user.Name, user.LastName, user.GoogleMe).Scan(&id)
 
 	if err != nil {
-		logger.Error("Bot Repository - CreateBot", err.Error())
+		logger.Error("Bot Repository - CreateUser", err.Error())
+
+		return 0, err
 	}
 
-	return err
+	return id, nil
 }

@@ -28,15 +28,28 @@ func CreateUser(idToken, accessToken string) *common.Response {
 		LastName: payload.Claims["family_name"].(string),
 	}
 
-	err = repositories.CreateUser(createUser)
+	userId, err := repositories.CreateUser(createUser)
 
 	if err != nil {
 		return common.GetErrorResponse("There was en error creating your user. Please request help.", http.StatusInternalServerError)
 	}
 
+	messages, err := google.GetGmailMessageList(createUser.GoogleMe, googleQuery, accessToken)
+
+	if err != nil {
+		logger.Error("User Service - Create User", err.Error())
+		return common.GetErrorResponse("There was en error requesting your mails. Please request help.", http.StatusInternalServerError)
+	}
+
+	lastGmailId := ""
+
+	if len(messages.Messages) > 0 {
+		lastGmailId = messages.Messages[0].Id
+	}
+
 	bot := &repositories.CreateBotBody{
-		UserId:      user.Id,
-		LastGmailId: nil,
+		UserId:      userId,
+		LastGmailId: &lastGmailId,
 	}
 
 	err = repositories.CreateBot(bot)
@@ -45,5 +58,10 @@ func CreateUser(idToken, accessToken string) *common.Response {
 		return common.GetErrorResponse("There was en error creating your bot. Please request help.", http.StatusInternalServerError)
 	}
 
-	return nil
+	return &common.Response{
+		Status: http.StatusOK,
+		Body: map[string]string{
+			"Message": "User Created",
+		},
+	}
 }

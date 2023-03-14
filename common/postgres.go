@@ -41,7 +41,5 @@ func (d *DB) GetConnection() *sql.DB {
 func (d *DB) getDriver() string {
 	pbConf := GetConfig().PersonalBotDB
 
-	GetLogger().LogObject("Common", pbConf)
-
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", pbConf.Host, pbConf.Port, pbConf.User, pbConf.Password, pbConf.DBName, pbConf.SSLMode)
 }

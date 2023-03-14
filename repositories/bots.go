@@ -60,10 +60,10 @@ func CreateBot(bot *CreateBotBody) error {
 	statement := `INSERT INTO personal_bot.t_bots(
 					user_id, last_gmail_id, last_payment_id)
 				VALUES 
-					($1, $2, $3) 
+					($1, $2, 0) 
 				RETURNING id`
 
-	_, err := db.GetConnection().Exec(statement, bot.UserId, bot.LastGmailId, 0)
+	_, err := db.GetConnection().Exec(statement, bot.UserId, *bot.LastGmailId)
 
 	if err != nil {
 		logger.Error("Bot Repository - CreateBot", err.Error())

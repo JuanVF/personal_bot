@@ -75,7 +75,7 @@ func GeneratePayments(body *GeneratePaymentsBody) *common.Response {
 		return common.GetErrorResponse("This user des not have a bot, please request a bot.", http.StatusBadRequest)
 	}
 
-	mails, err := google.GetGmailMessageList(user.GoogleMe, "from:(bncontacto@bncr.fi.cr OR popularvisa@bancopopularinforma.fi.cr)", body.BearerToken)
+	mails, err := google.GetGmailMessageList(user.GoogleMe, googleQuery, body.BearerToken)
 
 	if err != nil {
 		return common.GetErrorResponse("An error has ocurred while reading Gmail Mails. Please try again.", http.StatusBadRequest)
