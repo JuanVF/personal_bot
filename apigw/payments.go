@@ -34,6 +34,7 @@ func (payment PaymentRouter) GeneratePayments(w http.ResponseWriter, r *http.Req
 
 	if err != nil {
 		http.Error(w, "Invalid Body", http.StatusBadRequest)
+		return
 	}
 
 	resp := services.GeneratePayments(body)
@@ -51,6 +52,7 @@ func (payment PaymentRouter) GetPayments(w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		http.Error(w, "Invalid Body", http.StatusBadRequest)
+		return
 	}
 
 	resp := services.GetPaymentsByTokenId(body)

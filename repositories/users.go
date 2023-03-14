@@ -8,6 +8,12 @@ type User struct {
 	LastUpdated string
 }
 
+type CreateUserBody struct {
+	Name     string
+	LastName string
+	GoogleMe string
+}
+
 // Query all the users from the DB
 func GetUsers() ([]*User, error) {
 	statement := "SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users"
@@ -69,4 +75,21 @@ func GetUserByGoogleMe(email string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+// Creates an user in DB
+func CreateUser(user *CreateUserBody) error {
+	statement := `INSERT INTO personal_bot.t_users(
+					name, last_name, google_me, last_updated)
+				VALUES 
+					($1, $2, $3, NOW()) 
+				RETURNING id`
+
+	_, err := db.GetConnection().Exec(statement, user.Name, user.LastName, user.GoogleMe)
+
+	if err != nil {
+		logger.Error("Bot Repository - CreateBot", err.Error())
+	}
+
+	return err
 }

@@ -13,22 +13,14 @@ type GetTokenBody struct {
 
 // Service to retrieve an access token
 func GetToken(body *GetTokenBody) *common.Response {
-	var response *common.Response = &common.Response{
-		Status: http.StatusOK,
-	}
-
 	data, err := google.GetAccessToken(body.Code)
 
 	if err != nil {
-		response.Status = http.StatusBadRequest
-		response.Body = &common.ErrorResponse{
-			Message: err.Error(),
-		}
-
-		return response
+		return common.GetErrorResponse(err.Error(), http.StatusBadRequest)
 	}
 
-	response.Body = data
-
-	return response
+	return &common.Response{
+		Status: http.StatusOK,
+		Body:   data,
+	}
 }

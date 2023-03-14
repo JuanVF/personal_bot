@@ -29,24 +29,13 @@ type ProcessPaymentPayload struct {
 
 // Returns the payments for an specific user
 func GetPaymentsByTokenId(body *GetPaymentsBody) *common.Response {
-	payload, err := google.GetPayloadFromIDToken(body.IDToken)
+	user, err := getUserByIDToken(body.IDToken)
 
 	if err != nil {
 		return &common.Response{
 			Status: http.StatusBadRequest,
 			Body: &common.ErrorResponse{
-				Message: "Invalid ID Token",
-			},
-		}
-	}
-
-	user, err := repositories.GetUserByGoogleMe(payload.Claims["email"].(string))
-
-	if err != nil {
-		return &common.Response{
-			Status: http.StatusBadRequest,
-			Body: &common.ErrorResponse{
-				Message: "This user is not registered in Personal Bot",
+				Message: err.Error(),
 			},
 		}
 	}
@@ -74,57 +63,26 @@ func GeneratePayments(body *GeneratePaymentsBody) *common.Response {
 		Status: http.StatusOK,
 	}
 
-	payload, err := google.GetPayloadFromIDToken(body.IDToken)
+	user, err := getUserByIDToken(body.IDToken)
 
 	if err != nil {
-		return &common.Response{
-			Status: http.StatusBadRequest,
-			Body: &common.ErrorResponse{
-				Message: "Invalid ID Token",
-			},
-		}
-	}
-
-	user, err := repositories.GetUserByGoogleMe(payload.Claims["email"].(string))
-
-	if err != nil {
-		return &common.Response{
-			Status: http.StatusBadRequest,
-			Body: &common.ErrorResponse{
-				Message: "This user is not registered in Personal Bot",
-			},
-		}
+		return common.GetErrorResponse(err.Error(), http.StatusBadRequest)
 	}
 
 	bot, err := repositories.GetBotByUserId(user.Id)
 
 	if err != nil {
-		return &common.Response{
-			Status: http.StatusBadRequest,
-			Body: &common.ErrorResponse{
-				Message: "This user des not have a bot, please request a bot.",
-			},
-		}
+		return common.GetErrorResponse("This user des not have a bot, please request a bot.", http.StatusBadRequest)
 	}
 
 	mails, err := google.GetGmailMessageList(user.GoogleMe, "from:(bncontacto@bncr.fi.cr OR popularvisa@bancopopularinforma.fi.cr)", body.BearerToken)
 
 	if err != nil {
-		return &common.Response{
-			Status: http.StatusInternalServerError,
-			Body: &common.ErrorResponse{
-				Message: "An error has ocurred while reading Gmail Mails. Please try again.",
-			},
-		}
+		return common.GetErrorResponse("An error has ocurred while reading Gmail Mails. Please try again.", http.StatusBadRequest)
 	}
 
 	if mails.ResultSizeEstimate == 0 {
-		return &common.Response{
-			Status: http.StatusOK,
-			Body: &common.ErrorResponse{
-				Message: "There are not new payments to process.",
-			},
-		}
+		return common.GetErrorResponse("There are not new payments to process.", http.StatusBadRequest)
 	}
 
 	payments, err := ProcessPayments(&ProcessPaymentPayload{
@@ -135,12 +93,7 @@ func GeneratePayments(body *GeneratePaymentsBody) *common.Response {
 	})
 
 	if err != nil {
-		return &common.Response{
-			Status: http.StatusInternalServerError,
-			Body: &common.ErrorResponse{
-				Message: "An error has ocurred while processing the payments. Please check your data and verify.",
-			},
-		}
+		return common.GetErrorResponse("An error has ocurred while processing the payments. Please check your data and verify.", http.StatusInternalServerError)
 	}
 
 	repositories.InsertPayments(payments)

@@ -7,6 +7,11 @@ type Bot struct {
 	LastPaymentId int
 }
 
+type CreateBotBody struct {
+	UserId      int
+	LastGmailId *string
+}
+
 // Retrieves the Bot Info for a certain user
 func GetBotByUserId(userId int) (*Bot, error) {
 	var bot Bot = Bot{
@@ -45,6 +50,23 @@ func UpdateBot(bot *Bot) error {
 
 	if err != nil {
 		logger.Error("Bot Repository - Update Bot", err.Error())
+	}
+
+	return err
+}
+
+// Updates a bot info
+func CreateBot(bot *CreateBotBody) error {
+	statement := `INSERT INTO personal_bot.t_bots(
+					user_id, last_gmail_id, last_payment_id)
+				VALUES 
+					($1, $2, $3) 
+				RETURNING id`
+
+	_, err := db.GetConnection().Exec(statement, bot.UserId, bot.LastGmailId, 0)
+
+	if err != nil {
+		logger.Error("Bot Repository - CreateBot", err.Error())
 	}
 
 	return err
