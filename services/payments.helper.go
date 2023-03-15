@@ -15,9 +15,9 @@ type PaymentData struct {
 	Amount   float64
 }
 
-func GetSourceFromThread(headers *[]google.GmailMessageHeader) (string, error) {
+func GetHeader(headers *[]google.GmailMessageHeader, headerName string) (string, error) {
 	for _, header := range *headers {
-		if header.Name == "From" {
+		if header.Name == headerName {
 			return header.Value, nil
 		}
 	}

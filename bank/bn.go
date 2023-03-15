@@ -3,6 +3,7 @@ package bank
 import (
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/JuanVF/personal_bot/repositories"
 )
@@ -31,6 +32,8 @@ func (bn BN) getPayment(body string) *PaymentData {
 
 	amount = BNAmountRemove.ReplaceAllString(amount, "")
 	amount = BlankSpace.ReplaceAllString(amount, "")
+
+	amount = strings.ReplaceAll(amount, ",", "")
 
 	numericAmount, err := strconv.ParseFloat(amount, 64)
 

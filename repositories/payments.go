@@ -3,11 +3,12 @@ package repositories
 import "encoding/json"
 
 type CreatePayment struct {
-	Amount     float64
-	UserId     int
-	CurrencyId int
-	DolarPrice float64
-	Tags       []string
+	Amount      float64
+	UserId      int
+	CurrencyId  int
+	DolarPrice  float64
+	Tags        []string
+	LastUpdated string
 }
 
 type Payment struct {
@@ -30,7 +31,7 @@ func InsertPayment(payment *CreatePayment) (int, error) {
 
 	statement := `INSERT INTO personal_bot.t_payments(
 					amount, last_updated, user_id, currency_id, dolar_price, tags)
-				VALUES ($1, NOW(), $2, $3, $4, $5)
+				VALUES ($1, $2, $3, $4, $5, $6)
 				RETURNING id`
 
 	tags, err := json.Marshal(payment.Tags)
@@ -39,7 +40,7 @@ func InsertPayment(payment *CreatePayment) (int, error) {
 		return 0, err
 	}
 
-	err = db.GetConnection().QueryRow(statement, payment.Amount, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags)).Scan(&paymentId)
+	err = db.GetConnection().QueryRow(statement, payment.Amount, payment.LastUpdated, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags)).Scan(&paymentId)
 
 	if err != nil {
 		logger.Error("Payment Repository - Insert Payment", err.Error())
@@ -78,7 +79,7 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 	statement := `SELECT 
                     pay.id payment_id, 
                     pay.amount, 
-                    pay.last_updated,
+                    pay.last_updated AT TIME ZONE 'UTC-6',
 					pay.dolar_price,
 					pay.tags,
                     curr.name currency

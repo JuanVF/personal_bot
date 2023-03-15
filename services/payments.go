@@ -161,7 +161,13 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 		return nil, err
 	}
 
-	header, err := GetSourceFromThread(&thread.Payload.Headers)
+	header, err := GetHeader(&thread.Payload.Headers, "From")
+
+	if err != nil {
+		return nil, err
+	}
+
+	date, err := GetHeader(&thread.Payload.Headers, "Date")
 
 	if err != nil {
 		return nil, err
@@ -172,6 +178,7 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 	paymentData := bank.GetPaymentData(body, header)
 
 	if paymentData == nil {
+		common.GetLogger().Error("Payment Service", fmt.Sprintf("Body for Message ID[%s] didn't match requisites", threadId))
 		return nil, fmt.Errorf("Body didn't match requisites")
 	}
 
@@ -188,10 +195,11 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 	currency := repositories.GetCurrencyByName(paymentData.Currency.Name)
 
 	payment := &repositories.CreatePayment{
-		Amount:     paymentData.Amount,
-		CurrencyId: currency.Id,
-		Tags:       tags,
-		UserId:     user.Id,
+		Amount:      paymentData.Amount,
+		CurrencyId:  currency.Id,
+		Tags:        tags,
+		UserId:      user.Id,
+		LastUpdated: ConvertFROMRFC822toISOString(date),
 	}
 
 	return payment, nil
