@@ -32,7 +32,7 @@ container:
     gmail_url: https://gmail.googleapis.com
     client_id: --Replace this by your Client--
     secret: --Replace this by your secret--
-    redirect_uri: http://localhost:3000/auth/token
+    redirect_uri: --Replace this by your prod redirect URI--
   open_ai:
     open_ai_api: https://api.openai.com
     secret_key: --Replace this by your OpenAI key--

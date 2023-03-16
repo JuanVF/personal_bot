@@ -1,6 +1,8 @@
 package apigw
 
 import (
+	"crypto/tls"
+	"log"
 	"net/http"
 
 	"github.com/JuanVF/personal_bot/common"
@@ -10,9 +12,60 @@ import (
 var router *mux.Router = nil
 var logger *common.Logger = common.GetLogger()
 
-func Start() {
+type Server interface {
+	Serve()
+}
+
+type HttpsServer struct {
+}
+
+type HttpServer struct {
+}
+
+// Serve an HTTPS Server
+func (serv HttpsServer) Serve() {
 	router = mux.NewRouter()
 
+	HandleAllRoutes(router)
+
+	server := &http.Server{
+		Addr: ":443",
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CurvePreferences: []tls.CurveID{
+				tls.CurveP256,
+				tls.CurveP384,
+				tls.CurveP521,
+			},
+		},
+		Handler: router,
+	}
+
+	cert, err := tls.LoadX509KeyPair("server.crt", "server.key")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server.TLSConfig.Certificates = []tls.Certificate{cert}
+
+	log.Fatal(server.ListenAndServeTLS("", ""))
+}
+
+// Serve an HTTP Server
+func (serv HttpServer) Serve() {
+	router = mux.NewRouter()
+
+	HandleAllRoutes(router)
+
+	http.Handle("/", router)
+
+	logger.Log("APIGW", "Server started on :443")
+	http.ListenAndServe(":443", nil)
+}
+
+// Handle All Routes
+func HandleAllRoutes(r *mux.Router) {
 	routers := []RouterHandler{
 		AuthRoute{}, PaymentRouter{}, UserRouter{},
 	}
@@ -20,9 +73,16 @@ func Start() {
 	for _, r := range routers {
 		r.Handle()
 	}
+}
 
-	http.Handle("/", router)
+func Start() {
+	servers := []Server{HttpServer{}, HttpsServer{}}
 
-	logger.Log("APIGW", "Server started on :3000")
-	http.ListenAndServe(":3000", nil)
+	if common.GetEnvironment() == "development" {
+		servers[0].Serve()
+	}
+
+	if common.GetEnvironment() == "container" {
+		servers[1].Serve()
+	}
 }
