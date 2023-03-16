@@ -10,7 +10,7 @@ COPY . .
 
 RUN go build -o main .
 
-EXPOSE 3000
+EXPOSE 443
 
 ENV ENVIRONMENT container
 
