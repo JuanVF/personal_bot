@@ -12,4 +12,6 @@ RUN go build -o main .
 
 EXPOSE 3000
 
+ENV ENVIRONMENT container
+
 CMD ["./main"]

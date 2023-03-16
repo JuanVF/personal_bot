@@ -2,6 +2,11 @@ package common
 
 import "database/sql"
 
+type EnvironmentConfig struct {
+	Development Configuration `yaml:"development"`
+	Container   Configuration `yaml:"container"`
+}
+
 type Configuration struct {
 	Google        GoogleConf        `yaml:"google"`
 	Bot           BotConf           `yaml:"bot"`
