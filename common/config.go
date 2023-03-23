@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -19,14 +20,44 @@ func GetConfig() *Configuration {
 			GetLogger().Error("Config", fmt.Sprintf("yamlFile.Get err   #%v ", err))
 		}
 
-		config = &Configuration{}
+		configEnv := &EnvironmentConfig{}
 
-		err = yaml.Unmarshal(yamlFile, config)
+		err = yaml.Unmarshal(yamlFile, configEnv)
 
 		if err != nil {
 			GetLogger().Error("Config", fmt.Sprintf("Unmarshal: %v", err))
+
+			panic(err)
 		}
+
+		config = GetConfigByEnvironment(configEnv)
 	}
 
 	return config
+}
+
+// It will return the configuration based on the current environment
+func GetConfigByEnvironment(configEnv *EnvironmentConfig) *Configuration {
+	env := GetEnvironment()
+
+	if env == "development" {
+		return &configEnv.Development
+	}
+
+	if env == "container" {
+		return &configEnv.Container
+	}
+
+	return nil
+}
+
+// Returns the environment of the app
+func GetEnvironment() string {
+	env := os.Getenv("ENVIRONMENT")
+
+	if env == "" {
+		return "development"
+	}
+
+	return env
 }

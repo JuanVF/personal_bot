@@ -1,14 +1,14 @@
 services:
   personal_bot:
-    build: .
+    image: personal_bot:0.0.1
     depends_on:
       - personal_bot_db
     ports:
-      - "3000:3000"
+      - "443:443"
     links:
       - "personal_bot_db:database"
   personal_bot_db:
-    build: ./db/.
+    image: personal_bot_db:0.0.1
     restart: always
     ports:
       - "5432:5432"

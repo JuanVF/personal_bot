@@ -8,5 +8,12 @@ db/database.json
 db/docker-compose.yaml
 db/Dockerfile
 
+# EC2 Instance Files
+personal_bot_keys.pem
+
+# HTTPS Certificates
+server.crt
+server.key
+
 # IDE
 .idea/
