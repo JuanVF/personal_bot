@@ -14,3 +14,6 @@ personal_bot_keys.pem
 # HTTPS Certificates
 server.crt
 server.key
+
+# IDE
+.idea/
