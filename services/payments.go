@@ -119,7 +119,7 @@ func ProcessPayments(payload *ProcessPaymentPayload) ([]*repositories.CreatePaym
 		CurrentBank: bank.GF_DS,
 	}
 
-	dolarPrice := bank.Convert(1, &repositories.Currency{Name: "USD"}, &repositories.Currency{Name: "CRC"})
+	dollarPrice := bank.Convert(1, &repositories.Currency{Name: "USD"}, &repositories.Currency{Name: "CRC"})
 
 	for i, message := range messages {
 		if i == 0 {
@@ -136,7 +136,7 @@ func ProcessPayments(payload *ProcessPaymentPayload) ([]*repositories.CreatePaym
 			continue
 		}
 
-		payment.DolarPrice = dolarPrice
+		payment.DolarPrice = dollarPrice
 
 		payments = append(payments, payment)
 	}

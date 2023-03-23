@@ -7,3 +7,6 @@ db/node_modules/
 db/database.json
 db/docker-compose.yaml
 db/Dockerfile
+
+# IDE
+.idea/
