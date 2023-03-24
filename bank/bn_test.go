@@ -7,48 +7,38 @@ import (
 	"github.com/JuanVF/personal_bot/repositories"
 )
 
-func TestBankBAC_GetPaymentData(t *testing.T) {
-	tName := "TestBankBAC - it_can_detect_payment_data"
+func TestBankBN_GetPaymentData(t *testing.T) {
+	tName := "TestBankBN - it_can_detect_payment_data"
 	tests := []struct {
 		in   string
 		want PaymentData
 	}{
 		{
-			in: testfiles.TEST_1_BAC,
+			in: testfiles.BN_TEST_1,
 			want: PaymentData{
-				Body: "other",
+				Body: " realizada en *UBER EATS SAN JOSE CRI* ",
 				Currency: &repositories.Currency{
 					Name: "CRC",
 				},
-				Amount: 10120.00,
+				Amount: 5242,
 			},
 		},
 		{
-			in: testfiles.TEST_2_BAC,
+			in: testfiles.BN_TEST_2,
 			want: PaymentData{
-				Body: "LA SANWUCHERA TEC2",
-				Currency: &repositories.Currency{
-					Name: "CRC",
-				},
-				Amount: 120.00,
-			},
-		},
-		{
-			in: testfiles.TEST_3_BAC,
-			want: PaymentData{
-				Body: "LA SANWUCHERA TEC",
+				Body: " realizada en *XSOLLA TWITCH LIMASSOL CYP* ",
 				Currency: &repositories.Currency{
 					Name: "USD",
 				},
-				Amount: 10120.00,
+				Amount: 3.56,
 			},
 		},
 	}
 
-	bac := &BAC{}
+	bn := &BN{}
 
 	for _, test := range tests {
-		got := bac.getPayment(test.in)
+		got := bn.getPayment(test.in)
 
 		if got.Amount != test.want.Amount {
 			logger.TestError(tName, test.want.Amount, got.Amount, t)

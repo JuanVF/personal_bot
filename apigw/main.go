@@ -76,13 +76,17 @@ func HandleAllRoutes(r *mux.Router) {
 }
 
 func Start() {
-	servers := []Server{HttpServer{}, HttpsServer{}}
-
-	if common.GetEnvironment() == "development" {
-		servers[0].Serve()
+	// Define a map of server types with their corresponding instances
+	servers := map[string]Server{
+		"development": HttpServer{},
+		"container":   HttpsServer{},
 	}
 
-	if common.GetEnvironment() == "container" {
-		servers[1].Serve()
+	// Retrieve the server instance based on the environment
+	server, found := servers[common.GetEnvironment()]
+
+	// If the server instance is found, serve the server
+	if found {
+		server.Serve()
 	}
 }

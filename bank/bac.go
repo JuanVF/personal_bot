@@ -2,10 +2,11 @@ package bank
 
 import (
 	"fmt"
-	"github.com/JuanVF/personal_bot/repositories"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/JuanVF/personal_bot/repositories"
 )
 
 type BAC struct {
@@ -13,7 +14,7 @@ type BAC struct {
 
 func extractEstablishmentName(str string) (string, error) {
 	// Define a regular expression to match the establishment name pattern
-	re := regexp.MustCompile(`(?s)<p>Comercio:</p>\s*</td>\s*<td[^>]*>\s*<p[^>]*>([^<]+)</p>`)
+	re := regexp.MustCompile(`(?s)<p>Comercio:<\/p>\s*</td>\s*<td[^>]*>\s*<p[^>]*>([^<]+)<\/p>`)
 
 	// Find the first match of the regular expression in the string
 	match := re.FindStringSubmatch(str)
@@ -27,8 +28,8 @@ func extractEstablishmentName(str string) (string, error) {
 
 // It will convert from one currency to another using BN Data
 func (bac BAC) getPayment(body string) *PaymentData {
-
 	establishment, err := extractEstablishmentName(body)
+
 	if err != nil {
 		return nil
 	}

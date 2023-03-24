@@ -7,48 +7,38 @@ import (
 	"github.com/JuanVF/personal_bot/repositories"
 )
 
-func TestBankBAC_GetPaymentData(t *testing.T) {
-	tName := "TestBankBAC - it_can_detect_payment_data"
+func TestBankBP_it_can_detect_payment_data(t *testing.T) {
+	tName := "TestBankBP - it_can_detect_payment_data"
 	tests := []struct {
 		in   string
 		want PaymentData
 	}{
 		{
-			in: testfiles.TEST_1_BAC,
+			in: testfiles.BP_TEST_1,
 			want: PaymentData{
-				Body: "other",
-				Currency: &repositories.Currency{
-					Name: "CRC",
-				},
-				Amount: 10120.00,
-			},
-		},
-		{
-			in: testfiles.TEST_2_BAC,
-			want: PaymentData{
-				Body: "LA SANWUCHERA TEC2",
-				Currency: &repositories.Currency{
-					Name: "CRC",
-				},
-				Amount: 120.00,
-			},
-		},
-		{
-			in: testfiles.TEST_3_BAC,
-			want: PaymentData{
-				Body: "LA SANWUCHERA TEC",
+				Body: " APPLE.COM/BILL xxx-xxx-xxxx US por",
 				Currency: &repositories.Currency{
 					Name: "USD",
 				},
-				Amount: 10120.00,
+				Amount: 1.99,
+			},
+		},
+		{
+			in: testfiles.BP_TEST_2,
+			want: PaymentData{
+				Body: " DL DIDI FOODS SAN JOSE CR por",
+				Currency: &repositories.Currency{
+					Name: "CRC",
+				},
+				Amount: 4130,
 			},
 		},
 	}
 
-	bac := &BAC{}
+	bp := &BP{}
 
 	for _, test := range tests {
-		got := bac.getPayment(test.in)
+		got := bp.getPayment(test.in)
 
 		if got.Amount != test.want.Amount {
 			logger.TestError(tName, test.want.Amount, got.Amount, t)

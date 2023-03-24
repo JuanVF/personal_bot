@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
 )
 
 // Singleton object for the logger
@@ -93,6 +94,16 @@ func (l *Logger) Error(section, message string) {
 	normalWhite := l.getColor(STYLE_NO_EFFECT, COLOR_WHITE, BG_BLACK)
 
 	fmt.Printf("%s[%s%s%s][%s%s%s]:%s %s\n", yellowBold, redBold, l.headline, yellowBold, redBold, section, yellowBold, normalWhite, message)
+}
+
+// Prints a test error
+func (l *Logger) TestError(testName string, expected, got any, t *testing.T) {
+	greenBold := l.getColor(STYLE_BOLD, COLOR_GREEN, BG_BLACK)
+	redBold := l.getColor(STYLE_BOLD, COLOR_RED, BG_BLACK)
+	normalWhite := l.getColor(STYLE_NO_EFFECT, COLOR_WHITE, BG_BLACK)
+	yellowBold := l.getColor(STYLE_BOLD, COLOR_YELLOW, BG_BLACK)
+
+	t.Errorf("\n[%s%s%s]:\n\t%sGot: %v%s\n\t%sExpected: %v%s\n", yellowBold, testName, normalWhite, redBold, got, normalWhite, greenBold, expected, normalWhite)
 }
 
 // Returns a color with a certain format
