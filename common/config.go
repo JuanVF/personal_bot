@@ -10,11 +10,12 @@ import (
 
 var config *Configuration = nil
 var configPath string = "./common/local.yaml"
+var configTestPath string = "../common/local.yaml"
 
 // Returns the local yaml configuration data
 func GetConfig() *Configuration {
 	if config == nil {
-		yamlFile, err := ioutil.ReadFile(configPath)
+		yamlFile, err := ioutil.ReadFile(GetConfigPath())
 
 		if err != nil {
 			GetLogger().Error("Config", fmt.Sprintf("yamlFile.Get err   #%v ", err))
@@ -36,6 +37,16 @@ func GetConfig() *Configuration {
 	return config
 }
 
+func GetConfigPath() string {
+	env := GetEnvironment()
+
+	if env == "test" {
+		return configTestPath
+	}
+
+	return configPath
+}
+
 // It will return the configuration based on the current environment
 func GetConfigByEnvironment(configEnv *EnvironmentConfig) *Configuration {
 	env := GetEnvironment()
@@ -46,6 +57,10 @@ func GetConfigByEnvironment(configEnv *EnvironmentConfig) *Configuration {
 
 	if env == "container" {
 		return &configEnv.Container
+	}
+
+	if env == "test" {
+		return &configEnv.Test
 	}
 
 	return nil

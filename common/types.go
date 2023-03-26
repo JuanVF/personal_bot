@@ -1,10 +1,15 @@
 package common
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/DATA-DOG/go-sqlmock"
+)
 
 type EnvironmentConfig struct {
 	Development Configuration `yaml:"development"`
 	Container   Configuration `yaml:"container"`
+	Test        Configuration `yaml:"test"`
 }
 
 type Configuration struct {
@@ -57,6 +62,7 @@ type Logger struct {
 
 type DB struct {
 	connection *sql.DB
+	mock       *sqlmock.Sqlmock
 }
 
 type Response struct {

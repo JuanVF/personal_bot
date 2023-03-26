@@ -28,7 +28,10 @@ func (d *DB) GetConnection() *sql.DB {
 	env := GetEnvironment()
 
 	if env == "test" {
-		d.connection = d.getTestEnvConnection()
+		mockDB, mock := d.getTestEnvConnection()
+
+		d.connection = mockDB
+		d.mock = mock
 	} else {
 		d.connection = d.getConnection()
 	}
@@ -49,17 +52,22 @@ func (d *DB) getConnection() *sql.DB {
 	return db
 }
 
+// getMock Use a mock database connection for tests. USE ONLY FOR TESTS
+func (d *DB) GetMock() *sqlmock.Sqlmock {
+	return d.mock
+}
+
 // getTestEnvConnection Use a mock database connection for tests
-func (d *DB) getTestEnvConnection() *sql.DB {
+func (d *DB) getTestEnvConnection() (*sql.DB, *sqlmock.Sqlmock) {
 	// Use a mock database connection for tests
-	mockDB, _, err := sqlmock.New()
+	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 
 	if err != nil {
 		GetLogger().Error("Mock DB", err.Error())
 		panic(err)
 	}
 
-	return mockDB
+	return mockDB, &mock
 }
 
 // Returns the driver to connect to Postgres
