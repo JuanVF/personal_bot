@@ -81,7 +81,7 @@ We appreciate any contributions to the project and will review PRs and issues as
 
 ## Coding Standards
 
-To ensure consistency and maintainability of the Payment Mail Classifier with OpenAI GPT-3 codebase, we follow the following coding standards:
+To ensure consistency and maintainability of the Personal Bot, we follow the following coding standards:
 
 ### Go Version
 
