@@ -9,6 +9,8 @@ type CreatePayment struct {
 	DolarPrice  float64
 	Tags        []string
 	LastUpdated string
+	GmailId     string
+	Description string
 }
 
 type Payment struct {
@@ -18,6 +20,8 @@ type Payment struct {
 	Currency    string
 	DolarPrice  float64
 	Tags        []string
+	GmailId     *string
+	Description *string
 }
 
 type UserPayments struct {
@@ -30,8 +34,8 @@ func InsertPayment(payment *CreatePayment) (int, error) {
 	var paymentId int = 0
 
 	statement := `INSERT INTO personal_bot.t_payments(
-					amount, last_updated, user_id, currency_id, dolar_price, tags)
-				VALUES ($1, $2, $3, $4, $5, $6)
+					amount, last_updated, user_id, currency_id, dolar_price, tags, gmail_id, description)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 				RETURNING id`
 
 	tags, err := json.Marshal(payment.Tags)
@@ -40,7 +44,7 @@ func InsertPayment(payment *CreatePayment) (int, error) {
 		return 0, err
 	}
 
-	err = db.GetConnection().QueryRow(statement, payment.Amount, payment.LastUpdated, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags)).Scan(&paymentId)
+	err = db.GetConnection().QueryRow(statement, payment.Amount, payment.LastUpdated, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags), payment.GmailId, payment.Description).Scan(&paymentId)
 
 	if err != nil {
 		logger.Error("Payment Repository - Insert Payment", err.Error())
@@ -82,7 +86,9 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
                     pay.last_updated AT TIME ZONE 'UTC-6',
 					pay.dolar_price,
 					pay.tags,
-                    curr.name currency
+                    curr.name currency,
+					pay.gmail_id,
+					pay.description
                 FROM personal_bot.t_payments pay
                 INNER JOIN personal_bot.t_currencies curr
                     ON pay.currency_id = curr.id
@@ -102,7 +108,7 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 		var payment Payment = Payment{}
 		var tagsBody string = ""
 
-		if err := rows.Scan(&payment.Id, &payment.Amount, &payment.LastUpdated, &payment.DolarPrice, &tagsBody, &payment.Currency); err != nil {
+		if err := rows.Scan(&payment.Id, &payment.Amount, &payment.LastUpdated, &payment.DolarPrice, &tagsBody, &payment.Currency, &payment.GmailId, &payment.Description); err != nil {
 			return payments, err
 		}
 

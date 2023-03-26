@@ -200,6 +200,8 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 		Tags:        tags,
 		UserId:      user.Id,
 		LastUpdated: ConvertFROMRFC822toISOString(date),
+		Description: paymentData.Body,
+		GmailId:     thread.Id,
 	}
 
 	return payment, nil
