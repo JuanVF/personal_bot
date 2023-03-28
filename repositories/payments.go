@@ -92,7 +92,8 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
                 FROM personal_bot.t_payments pay
                 INNER JOIN personal_bot.t_currencies curr
                     ON pay.currency_id = curr.id
-                WHERE pay.user_id = $1`
+                WHERE pay.user_id = $1
+				ORDER BY pay.last_updated DESC`
 
 	rows, err := db.GetConnection().Query(statement, userId)
 
