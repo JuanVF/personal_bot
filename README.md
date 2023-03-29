@@ -116,3 +116,9 @@ By following these coding standards, we can ensure that the codebase is consiste
 ## Tags
 
 > `Go` `Docker` `PostgreSQL` `OAuth2.0` `OpenAI GPT-3`
+
+## License
+
+This repo uses (CC BY-NC)
+
+[![Licencia Creative Commons](https://i.creativecommons.org/l/by-nc/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc/4.0/)
