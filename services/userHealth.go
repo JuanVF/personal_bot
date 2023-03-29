@@ -45,3 +45,20 @@ func AddUserHealth(params *AddUserHealthBody) *common.Response {
 
 	return common.GetSuccessResponse(map[string]string{"Message": "User Health Set"})
 }
+
+// This function will return the user health data
+func GetUserHealth(idToken string) *common.Response {
+	user, err := getUserByIDToken(idToken)
+
+	if err != nil {
+		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
+	}
+
+	userHealthData, err := repositories.GetUserHealthByUserId(user.Id)
+
+	if err != nil {
+		return common.GetErrorResponse("Error while getting your health data", http.StatusInternalServerError)
+	}
+
+	return common.GetSuccessResponse(userHealthData)
+}

@@ -1,9 +1,7 @@
 package repositories
 
 import (
-	"database/sql"
 	"errors"
-	"fmt"
 )
 
 type HealthCondition struct {
@@ -91,7 +89,7 @@ func UpdateUserHealth(userHealth *UserHealth) error {
 }
 
 // Get a user health record by user id
-func GetUserHealthByUserId(userId int) (*UserHealth, error) {
+func GetUserHealthByUserId(userId int) ([]*UserHealth, error) {
 	statement := `SELECT uh.id, uh.user_id, uh.health_condition_id, uh.diagnosis_date, uh.treatment, 
 					  uh.discharged_date, 
 					  hc.name as health_condition_name, hc.description as health_condition_description
@@ -99,23 +97,33 @@ func GetUserHealthByUserId(userId int) (*UserHealth, error) {
 				   INNER JOIN personal_bot.t_health_conditions hc ON uh.health_condition_id = hc.id
 				   WHERE uh.user_id = $1`
 
-	row := db.GetConnection().QueryRow(statement, userId)
-
-	var userHealth UserHealth
-
-	err := row.Scan(&userHealth.Id, &userHealth.UserId, &userHealth.HealthConditionId, &userHealth.DiagnosisDate,
-		&userHealth.Treatment, &userHealth.DischargedDate, &userHealth.HealthCondition.Name,
-		&userHealth.HealthCondition.Description)
+	rows, err := db.GetConnection().Query(statement, userId)
 
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("UserHealth Repository - GetUserHealthByUserId: user health with userId=%d not found", userId)
-		}
-
 		logger.Error("UserHealth Repository - GetUserHealthByUserId", err.Error())
 
 		return nil, err
 	}
 
-	return &userHealth, nil
+	defer rows.Close()
+
+	var userHealth []*UserHealth = make([]*UserHealth, 0)
+
+	for rows.Next() {
+		var uh UserHealth
+
+		err := rows.Scan(&uh.Id, &uh.UserId, &uh.HealthConditionId, &uh.DiagnosisDate,
+			&uh.Treatment, &uh.DischargedDate, &uh.HealthCondition.Name,
+			&uh.HealthCondition.Description)
+
+		if err != nil {
+			logger.Error("UserHealth Repository - GetUserHealthByUserId", err.Error())
+
+			return nil, err
+		}
+
+		userHealth = append(userHealth, &uh)
+	}
+
+	return userHealth, nil
 }
