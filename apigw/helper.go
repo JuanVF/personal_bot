@@ -13,3 +13,8 @@ func writeResponse(w http.ResponseWriter, response *common.Response) {
 	w.WriteHeader(response.Status)
 	json.NewEncoder(w).Encode(response.Body)
 }
+
+// Crops the ID Token for logging purposes
+func cropIdToken(idToken string) string {
+	return idToken[:20] + "..." + idToken[len(idToken)-7:]
+}

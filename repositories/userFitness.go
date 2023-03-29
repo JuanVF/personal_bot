@@ -64,6 +64,73 @@ func CreateFitnessGoal(goal *FitnessGoal) error {
 	return nil
 }
 
+// GetFitnessGoalsByUser returns all the fitness goals for the user
+func GetFitnessGoalsByUser(userId int) ([]FitnessGoal, error) {
+	statement := `
+		SELECT 
+			g.id, 
+			g.user_id, 
+			g.name, 
+			g.description, 
+			g.start_date,
+			s.id AS status_id,
+			s.name AS status_name,
+			t.id AS target_id,
+			t.name AS target_name,
+			m.id AS measure_id,
+			m.name AS measure_name,
+			g.creation_date
+		FROM personal_bot.t_fitness_goals g
+		INNER JOIN personal_bot.t_fitness_goal_statuses s ON s.id = g.fitness_goal_status_id
+		INNER JOIN personal_bot.t_fitness_targets t ON t.id = g.fitness_target_id
+		INNER JOIN personal_bot.t_measures m ON m.id = g.measure_id
+		WHERE g.user_id = $1
+	`
+
+	rows, err := db.GetConnection().Query(statement, userId)
+
+	if err != nil {
+		logger.Error("Fitness Goals Repository - Get Fitness Goals By User", err.Error())
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var goals []FitnessGoal
+
+	for rows.Next() {
+		var goal FitnessGoal
+		var status FitnessGoalStatus
+		var target FitnessTarget
+		var measure Measure
+
+		if err := rows.Scan(
+			&goal.Id,
+			&goal.UserId,
+			&goal.Name,
+			&goal.Description,
+			&goal.StartDate,
+			&status.Id,
+			&status.Name,
+			&target.Id,
+			&target.Name,
+			&measure.Id,
+			&measure.Name,
+			&goal.CreationDate,
+		); err != nil {
+			return nil, err
+		}
+
+		goal.FitnessGoalStatus = status
+		goal.FitnessTarget = target
+		goal.Measure = measure
+
+		goals = append(goals, goal)
+	}
+
+	return goals, nil
+}
+
 // Return a measure by its name
 func GetMeasureByName(name string) (*Measure, error) {
 	statement := "SELECT id, name FROM personal_bot.t_measures WHERE name = $1"

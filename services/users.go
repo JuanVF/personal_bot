@@ -88,3 +88,37 @@ func createBotByUser(accessToken string, user *repositories.User) error {
 
 	return nil
 }
+
+// Returns all the personal data stored in personal bot
+func GetPersonalData(idToken string) *common.Response {
+	user, err := getUserByIDToken(idToken)
+
+	if err != nil {
+		return common.GetErrorResponse("Invalid ID Token", http.StatusUnauthorized)
+	}
+
+	bot, err := repositories.GetBotByUserId(user.Id)
+
+	if err != nil {
+		return common.GetErrorResponse("There was en error requesting your bot. Please request help.", http.StatusInternalServerError)
+	}
+
+	healthData, err := repositories.GetUserHealthByUserId(user.Id)
+
+	if err != nil {
+		return common.GetErrorResponse("There was en error requesting your health data. Please request help.", http.StatusInternalServerError)
+	}
+
+	fitnessGoals, err := repositories.GetFitnessGoalsByUser(user.Id)
+
+	if err != nil {
+		return common.GetErrorResponse("There was en error requesting your fitness goals. Please request help.", http.StatusInternalServerError)
+	}
+
+	return common.GetSuccessResponse(map[string]interface{}{
+		"user":          user,
+		"bot":           bot,
+		"health_data":   healthData,
+		"fitness_goals": fitnessGoals,
+	})
+}

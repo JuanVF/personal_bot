@@ -43,8 +43,6 @@ func (userHealth UserHealthRouter) SetUserHealth(w http.ResponseWriter, r *http.
 
 // Gets all the user health data
 func (userHealth UserHealthRouter) GetUserHealth(w http.ResponseWriter, r *http.Request) {
-	logger.Log("APIGW", "[GET] /user/health")
-
 	urlParams := mux.Vars(r)
 	idToken := urlParams["id_token"]
 
@@ -52,6 +50,8 @@ func (userHealth UserHealthRouter) GetUserHealth(w http.ResponseWriter, r *http.
 		http.Error(w, "Invalid Body", http.StatusBadRequest)
 		return
 	}
+
+	logger.Log("APIGW", fmt.Sprintf("[GET] /user/health/%s", cropIdToken(idToken)))
 
 	resp := services.GetUserHealth(idToken)
 
