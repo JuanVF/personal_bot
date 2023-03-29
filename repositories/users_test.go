@@ -8,15 +8,21 @@ import (
 )
 
 var userTest *CreateUserBody = &CreateUserBody{
-	Name:     "Jhon",
-	LastName: "Doe",
-	GoogleMe: "jhon.doe@gmail.com",
+	Name:            "Jhon",
+	LastName:        "Doe",
+	GoogleMe:        "jhon.doe@gmail.com",
+	Weight:          80.5,
+	Height:          180,
+	ActivityLevelId: 1,
 }
 
 var fakeUserTest *CreateUserBody = &CreateUserBody{
-	Name:     "Not Jhon",
-	LastName: "Fake Doe",
-	GoogleMe: "fake.jhon.doe@gmail.com",
+	Name:            "Not Jhon",
+	LastName:        "Fake Doe",
+	GoogleMe:        "fake.jhon.doe@gmail.com",
+	Weight:          62.1,
+	Height:          172,
+	ActivityLevelId: 2,
 }
 
 func TestCreateUser(t *testing.T) {
@@ -26,8 +32,12 @@ func TestCreateUser(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
 
-	mock.ExpectQuery("INSERT INTO personal_bot.t_users( name, last_name, google_me, last_updated) VALUES ($1, $2, $3, NOW()) RETURNING id").
-		WithArgs(userTest.Name, userTest.LastName, userTest.GoogleMe).
+	mock.ExpectQuery(`INSERT INTO personal_bot.t_users(
+						name, last_name, google_me, last_updated, weight, height, activity_level_id)
+					VALUES 
+						($1, $2, $3, NOW(), $4, $5, $6) 
+					RETURNING id`).
+		WithArgs(userTest.Name, userTest.LastName, userTest.GoogleMe, userTest.Weight, userTest.Height, userTest.ActivityLevelId).
 		WillReturnRows(rows)
 
 	// Call function to be tested
@@ -50,9 +60,15 @@ func TestGetUserByGoogleMe(t *testing.T) {
 
 	mock := *db.GetMock()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"}).AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00")
+	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated", "weight", "height", "activity_level_id", "name", "description"}).
+		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00", userTest.Weight, userTest.Height, userTest.ActivityLevelId, "Sedentary", "Little or no exercise")
 
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE google_me = $1").
+	mock.ExpectQuery(`SELECT 
+						u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+						al.name, al.description
+					FROM personal_bot.t_users u
+					INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+					WHERE u.google_me = $1`).
 		WithArgs(userTest.GoogleMe).
 		WillReturnRows(rows)
 
@@ -84,9 +100,14 @@ func TestGetUserByGoogleMeWhenItShouldNotExists(t *testing.T) {
 
 	mock := *db.GetMock()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"})
+	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated", "weight", "height", "activity_level_id", "name", "description"})
 
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE google_me = $1").
+	mock.ExpectQuery(`SELECT 
+						u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+						al.name, al.description
+					FROM personal_bot.t_users u
+					INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+					WHERE u.google_me = $1`).
 		WithArgs(fakeUserTest.GoogleMe).
 		WillReturnRows(rows)
 
@@ -110,10 +131,15 @@ func TestGetUser(t *testing.T) {
 
 	mock := *db.GetMock()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"}).
-		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00")
+	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated", "weight", "height", "activity_level_id", "name", "description"}).
+		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00", userTest.Weight, userTest.Height, userTest.ActivityLevelId, "Sedentary", "Little or no exercise")
 
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE id = $1").
+	mock.ExpectQuery(`SELECT 
+						u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+						al.name, al.description
+					FROM personal_bot.t_users u
+					INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+					WHERE u.id = $1`).
 		WithArgs(1).
 		WillReturnRows(rows)
 
@@ -152,9 +178,14 @@ func TestGetUserWhenNotFound(t *testing.T) {
 	tName := "User Repository - Get User - When not found"
 	mock := *db.GetMock()
 
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"})
+	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated", "weight", "height", "activity_level_id", "name", "description"})
 
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE id = $1").
+	mock.ExpectQuery(`SELECT 
+						u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+						al.name, al.description
+					FROM personal_bot.t_users u
+					INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+					WHERE u.id = $1`).
 		WithArgs(100).
 		WillReturnRows(rows)
 
@@ -170,61 +201,5 @@ func TestGetUserWhenNotFound(t *testing.T) {
 
 	if user != nil {
 		logger.TestError(tName, "User should be nil", fmt.Sprintf("User: %v", user), t)
-	}
-}
-
-func TestGetAllUsers(t *testing.T) {
-	tName := "User Repository - Get All Users"
-
-	mock := *db.GetMock()
-
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"}).
-		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00").
-		AddRow(2, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00")
-
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users").
-		WillReturnRows(rows)
-
-	// Call function to be tested
-	users, _ := GetUsers()
-
-	// Verify that the expected query was executed
-	err := mock.ExpectationsWereMet()
-
-	if err != nil {
-		logger.TestError(tName, "Expectations Fullfilled", err.Error(), t)
-	}
-
-	if users == nil {
-		logger.TestError(tName, "Users should not be nil", "Users is nil", t)
-	}
-
-	if len(users) != 2 {
-		logger.TestError(tName, "Users length should be 2", fmt.Sprintf("Users length is: %d", len(users)), t)
-	}
-}
-
-func TestGetAllUsersWhenNotFound(t *testing.T) {
-	tName := "User Repository - Get All Users - When not found"
-
-	mock := *db.GetMock()
-
-	rows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"})
-
-	mock.ExpectQuery("SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users").
-		WillReturnRows(rows)
-
-	// Call function to be tested
-	users, _ := GetUsers()
-
-	// Verify that the expected query was executed
-	err := mock.ExpectationsWereMet()
-
-	if err != nil {
-		logger.TestError(tName, "Expectations Fullfilled", err.Error(), t)
-	}
-
-	if len(users) > 0 {
-		logger.TestError(tName, "Users should length should be 0", fmt.Sprintf("Users: %v", users), t)
 	}
 }

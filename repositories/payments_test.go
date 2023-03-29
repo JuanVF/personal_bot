@@ -70,10 +70,15 @@ func TestGetPaymentsByUserId(t *testing.T) {
 	mock := *db.GetMock()
 
 	// We prepare the expected query result for the user
-	userRows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated"}).
-		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00")
+	userRows := sqlmock.NewRows([]string{"id", "name", "last_name", "google_me", "last_updated", "weight", "height", "activity_level_id", "name", "description"}).
+		AddRow(1, userTest.Name, userTest.LastName, userTest.GoogleMe, "2019-01-01 00:00:00", userTest.Weight, userTest.Height, userTest.ActivityLevelId, "Sedentary", "Little or no exercise")
 
-	mock.ExpectQuery(`SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE id = $1`).
+	mock.ExpectQuery(`SELECT 
+			u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+			al.name, al.description
+		FROM personal_bot.t_users u
+		INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+		WHERE u.id = $1`).
 		WithArgs(1).
 		WillReturnRows(userRows)
 

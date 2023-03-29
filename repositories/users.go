@@ -6,17 +6,24 @@ import (
 )
 
 type User struct {
-	Id          int
-	Name        string
-	LastName    string
-	GoogleMe    string
-	LastUpdated string
+	Id              int
+	Name            string
+	LastName        string
+	GoogleMe        string
+	LastUpdated     string
+	Weight          float64
+	Height          float64
+	ActivityLevelId int
+	ActivityLevel   ActivityLevel
 }
 
 type CreateUserBody struct {
-	Name     string
-	LastName string
-	GoogleMe string
+	Name            string
+	LastName        string
+	GoogleMe        string
+	Weight          float64
+	Height          float64
+	ActivityLevelId int
 }
 
 type ActivityLevel struct {
@@ -46,48 +53,27 @@ func GetActivityLevelByName(name string) (*ActivityLevel, error) {
 	return &activityLevel, nil
 }
 
-// Query all the users from the DB
-func GetUsers() ([]*User, error) {
-	statement := "SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users"
-
-	rows, err := db.GetConnection().Query(statement)
-
-	if err != nil {
-		logger.Error("User Repository - Get Users", err.Error())
-
-		return []*User{}, err
-	}
-
-	defer rows.Close()
-
-	var users []*User = make([]*User, 0)
-
-	for rows.Next() {
-		var user User
-
-		if err := rows.Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated); err != nil {
-			return users, err
-		}
-
-		users = append(users, &user)
-	}
-
-	return users, nil
-}
-
 // Returns a single user from DB
 func GetUser(id int) (*User, error) {
 	var user User = User{}
 
-	statement := "SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE id = $1"
+	statement := `SELECT 
+						u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+						al.name, al.description
+					FROM personal_bot.t_users u
+					INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+					WHERE u.id = $1`
 
-	err := db.GetConnection().QueryRow(statement, id).Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated)
+	err := db.GetConnection().
+		QueryRow(statement, id).Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated, &user.Weight, &user.Height, &user.ActivityLevelId, &user.ActivityLevel.Name, &user.ActivityLevel.Description)
 
 	if err != nil {
 		logger.Error("User Repository - Get User", err.Error())
 
 		return nil, err
 	}
+
+	user.ActivityLevel.Id = user.ActivityLevelId
 
 	return &user, nil
 }
@@ -96,9 +82,16 @@ func GetUser(id int) (*User, error) {
 func GetUserByGoogleMe(email string) (*User, error) {
 	var user User = User{}
 
-	statement := "SELECT id, name, last_name, google_me, last_updated FROM personal_bot.t_users WHERE google_me = $1"
+	statement := `SELECT 
+					u.id, u.name, u.last_name, u.google_me, u.last_updated, u.weight, u.height, u.activity_level_id,
+					al.name, al.description
+				  FROM personal_bot.t_users u
+				  INNER JOIN personal_bot.t_activity_levels al ON al.id = u.activity_level_id
+				  WHERE u.google_me = $1`
 
-	err := db.GetConnection().QueryRow(statement, email).Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated)
+	err := db.GetConnection().
+		QueryRow(statement, email).
+		Scan(&user.Id, &user.Name, &user.LastName, &user.GoogleMe, &user.LastUpdated, &user.Weight, &user.Height, &user.ActivityLevelId, &user.ActivityLevel.Name, &user.ActivityLevel.Description)
 
 	if err != nil {
 		logger.Error("User Repository - Get User By Google Me", err.Error())
@@ -106,19 +99,22 @@ func GetUserByGoogleMe(email string) (*User, error) {
 		return nil, err
 	}
 
+	user.ActivityLevel.Id = user.ActivityLevelId
+
 	return &user, nil
 }
 
 // Creates an user in DB
 func CreateUser(user *CreateUserBody) (int, error) {
 	statement := `INSERT INTO personal_bot.t_users(
-					name, last_name, google_me, last_updated)
+					name, last_name, google_me, last_updated, weight, height, activity_level_id)
 				VALUES 
-					($1, $2, $3, NOW()) 
+					($1, $2, $3, NOW(), $4, $5, $6) 
 				RETURNING id`
 
 	var id int
-	err := db.GetConnection().QueryRow(statement, user.Name, user.LastName, user.GoogleMe).Scan(&id)
+
+	err := db.GetConnection().QueryRow(statement, user.Name, user.LastName, user.GoogleMe, user.Weight, user.Height, user.ActivityLevelId).Scan(&id)
 
 	if err != nil {
 		logger.Error("Bot Repository - CreateUser", err.Error())
