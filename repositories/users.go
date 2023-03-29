@@ -1,5 +1,10 @@
 package repositories
 
+import (
+	"database/sql"
+	"fmt"
+)
+
 type User struct {
 	Id          int
 	Name        string
@@ -12,6 +17,33 @@ type CreateUserBody struct {
 	Name     string
 	LastName string
 	GoogleMe string
+}
+
+type ActivityLevel struct {
+	Id          int
+	Name        string
+	Description string
+}
+
+// Get an activity level by name
+func GetActivityLevelByName(name string) (*ActivityLevel, error) {
+	var activityLevel ActivityLevel
+
+	query := "SELECT id, name, description FROM personal_bot.t_activity_levels WHERE name = $1"
+
+	err := db.GetConnection().QueryRow(query, name).Scan(&activityLevel.Id, &activityLevel.Name, &activityLevel.Description)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("Not Found")
+		} else {
+			logger.Error("Activity Level Repository - Get Activity Level By Name", err.Error())
+
+			return nil, err
+		}
+	}
+
+	return &activityLevel, nil
 }
 
 // Query all the users from the DB

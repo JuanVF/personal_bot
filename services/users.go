@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/JuanVF/personal_bot/common"
@@ -10,16 +11,33 @@ import (
 
 // Creates an user and its require data
 func CreateUser(idToken, accessToken string) *common.Response {
+	user, err := createUserByIdToken(idToken)
+
+	if err != nil {
+		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
+	}
+
+	err = createBotByUser(accessToken, user)
+
+	if err != nil {
+		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
+	}
+
+	return common.GetSuccessResponse(map[string]string{"Message": "User Created"})
+}
+
+// Creates an user by its ID Token
+func createUserByIdToken(idToken string) (*repositories.User, error) {
 	payload, err := google.GetPayloadFromIDToken(idToken)
 
 	if err != nil {
-		return common.GetErrorResponse("Invalid ID Token", http.StatusInternalServerError)
+		return nil, fmt.Errorf("Invalid ID Token")
 	}
 
 	user, err := repositories.GetUserByGoogleMe(payload.Claims["email"].(string))
 
 	if user != nil {
-		return common.GetErrorResponse("This user is already registered in Personal Bot.", http.StatusInternalServerError)
+		return nil, fmt.Errorf("This user is already registered in Personal Bot.")
 	}
 
 	createUser := &repositories.CreateUserBody{
@@ -31,14 +49,24 @@ func CreateUser(idToken, accessToken string) *common.Response {
 	userId, err := repositories.CreateUser(createUser)
 
 	if err != nil {
-		return common.GetErrorResponse("There was en error creating your user. Please request help.", http.StatusInternalServerError)
+		return nil, fmt.Errorf("There was en error creating your user. Please request help.")
 	}
 
-	messages, err := google.GetGmailMessageList(createUser.GoogleMe, googleQuery, accessToken)
+	return &repositories.User{
+		Id:       userId,
+		GoogleMe: payload.Claims["email"].(string),
+		Name:     payload.Claims["given_name"].(string),
+		LastName: payload.Claims["family_name"].(string),
+	}, nil
+}
+
+// Creates a bot for an user
+func createBotByUser(accessToken string, user *repositories.User) error {
+	messages, err := google.GetGmailMessageList(user.GoogleMe, googleQuery, accessToken)
 
 	if err != nil {
 		logger.Error("User Service - Create User", err.Error())
-		return common.GetErrorResponse("There was en error requesting your mails. Please request help.", http.StatusInternalServerError)
+		return fmt.Errorf("There was en error requesting your mails. Please request help.")
 	}
 
 	lastGmailId := ""
@@ -48,20 +76,15 @@ func CreateUser(idToken, accessToken string) *common.Response {
 	}
 
 	bot := &repositories.CreateBotBody{
-		UserId:      userId,
+		UserId:      user.Id,
 		LastGmailId: &lastGmailId,
 	}
 
 	err = repositories.CreateBot(bot)
 
 	if err != nil {
-		return common.GetErrorResponse("There was en error creating your bot. Please request help.", http.StatusInternalServerError)
+		return fmt.Errorf("There was en error creating your bot. Please request help.")
 	}
 
-	return &common.Response{
-		Status: http.StatusOK,
-		Body: map[string]string{
-			"Message": "User Created",
-		},
-	}
+	return nil
 }

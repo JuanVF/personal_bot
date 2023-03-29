@@ -67,7 +67,7 @@ func (serv HttpServer) Serve() {
 // Handle All Routes
 func HandleAllRoutes(r *mux.Router) {
 	routers := []RouterHandler{
-		AuthRoute{}, PaymentRouter{}, UserRouter{},
+		AuthRoute{}, PaymentRouter{}, UserRouter{}, UserHealthRouter{},
 	}
 
 	for _, r := range routers {
