@@ -1,6 +1,6 @@
 # Personal Bot
 
-This repository is an application that uses OpenAI GPT-3 to classify payments mails from your Gmail account and store them in a PostgreSQL database. The application is protected using Google's OAuth2.0 Service, ensuring the security of your information.
+This repository is an application that uses OpenAI GPT-3 to classify payments mails from your Gmail account and store them in a PostgreSQL database. The application is protected using Google's OAuth2.0 Service, ensuring the security of your information. You can use this bot for personal use, but can not be used for commercial purposes.
 
 ## Technologies Used
 
