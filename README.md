@@ -77,6 +77,8 @@ We welcome contributions from the community to help improve the `Personal Bot`. 
 
 - If you are not a collaborator, you can fork the repository, create a new branch to work on your feature, push your changes to your branch in your forked repository, and then create a Pull Request to merge your changes into the main branch of the original repository. Please make sure to follow the `coding standards` and include unit tests for any new features or changes.
 
+- Make sure to add the Copyright notice to any new files that you create. And please make sure to add your name to the `CONTRIBUTORS.md` file and in the copyright notice of any new files that you create.
+
 We appreciate any contributions to the project and will review PRs and issues as soon as possible.
 
 ## Coding Standards
