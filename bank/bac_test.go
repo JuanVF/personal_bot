@@ -43,7 +43,8 @@ func TestBankBAC_GetPaymentData(t *testing.T) {
 				Currency: &repositories.Currency{
 					Name: "CRC",
 				},
-				Amount: 10120.00,
+				Amount:   10120.00,
+				BankName: "BAC",
 			},
 		},
 		{
@@ -53,7 +54,8 @@ func TestBankBAC_GetPaymentData(t *testing.T) {
 				Currency: &repositories.Currency{
 					Name: "CRC",
 				},
-				Amount: 120.00,
+				Amount:   120.00,
+				BankName: "BAC",
 			},
 		},
 		{
@@ -63,7 +65,7 @@ func TestBankBAC_GetPaymentData(t *testing.T) {
 				Currency: &repositories.Currency{
 					Name: "USD",
 				},
-				Amount: 10120.00,
+				Amount: 10120.00, BankName: "BAC",
 			},
 		},
 	}
@@ -81,6 +83,9 @@ func TestBankBAC_GetPaymentData(t *testing.T) {
 		}
 		if got.Body != test.want.Body {
 			logger.TestError(tName, test.want.Body, got.Body, t)
+		}
+		if got.BankName != test.want.BankName {
+			logger.TestError(tName, test.want.BankName, got.BankName, t)
 		}
 	}
 }

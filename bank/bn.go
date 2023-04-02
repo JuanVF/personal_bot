@@ -48,7 +48,8 @@ func (bn BN) getPayment(body string) *PaymentData {
 		Currency: &repositories.Currency{
 			Name: currency,
 		},
-		Amount: amount,
+		Amount:   amount,
+		BankName: "BN",
 	}
 }
 

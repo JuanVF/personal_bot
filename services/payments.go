@@ -215,6 +215,14 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 
 	currency := repositories.GetCurrencyByName(paymentData.Currency.Name)
 
+	dbBank, err := repositories.GetBankByName(paymentData.BankName)
+
+	if err != nil {
+		common.GetLogger().Error("Payment Service", fmt.Sprintf("Bank[%s] not found", paymentData.BankName))
+
+		return nil, fmt.Errorf("Error while getting bank")
+	}
+
 	payment := &repositories.CreatePayment{
 		Amount:      paymentData.Amount,
 		CurrencyId:  currency.Id,
@@ -223,6 +231,7 @@ func ProcessPayment(threadId, token string, user *repositories.User) (*repositor
 		LastUpdated: ConvertFROMRFC822toISOString(date),
 		Description: paymentData.Body,
 		GmailId:     thread.Id,
+		IdBank:      dbBank.Id,
 	}
 
 	return payment, nil

@@ -86,6 +86,12 @@ func (b *Bank) getMatcher(from string) BankMatcher {
 		return BP{}
 	}
 
+	matched, err = regexp.MatchString("notificacion@notificacionesbaccr\\.com", from)
+
+	if matched && err == nil {
+		return BAC{}
+	}
+
 	logger.Error("Bank", "Matcher Not Supported")
 
 	return nil

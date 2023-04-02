@@ -21,7 +21,12 @@ If you would like to use this work for commercial purposes, please contact Juan 
 */
 package repositories
 
-import "encoding/json"
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"time"
+)
 
 type CreatePayment struct {
 	Amount      float64
@@ -32,6 +37,7 @@ type CreatePayment struct {
 	LastUpdated string
 	GmailId     string
 	Description string
+	IdBank      int
 }
 
 type Payment struct {
@@ -43,6 +49,18 @@ type Payment struct {
 	Tags        []string
 	GmailId     *string
 	Description *string
+	IdBank      *int
+	Bank        *Bank
+}
+
+type Bank struct {
+	Id   int
+	Name string
+}
+
+type bankCacheItem struct {
+	bank       *Bank
+	expiration time.Time
 }
 
 type UserPayments struct {
@@ -50,13 +68,15 @@ type UserPayments struct {
 	Payments []*Payment
 }
 
+var bankCache = make(map[string]bankCacheItem)
+
 // Inserts a payment and its tags to the database
 func InsertPayment(payment *CreatePayment) (int, error) {
 	var paymentId int = 0
 
 	statement := `INSERT INTO personal_bot.t_payments(
-					amount, last_updated, user_id, currency_id, dolar_price, tags, gmail_id, description)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+					amount, last_updated, user_id, currency_id, dolar_price, tags, gmail_id, description, id_bank)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 				RETURNING id`
 
 	tags, err := json.Marshal(payment.Tags)
@@ -65,7 +85,9 @@ func InsertPayment(payment *CreatePayment) (int, error) {
 		return 0, err
 	}
 
-	err = db.GetConnection().QueryRow(statement, payment.Amount, payment.LastUpdated, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags), payment.GmailId, payment.Description).Scan(&paymentId)
+	err = db.GetConnection().
+		QueryRow(statement, payment.Amount, payment.LastUpdated, payment.UserId, payment.CurrencyId, payment.DolarPrice, string(tags), payment.GmailId, payment.Description, payment.IdBank).
+		Scan(&paymentId)
 
 	if err != nil {
 		logger.Error("Payment Repository - Insert Payment", err.Error())
@@ -109,10 +131,14 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 					pay.tags,
                     curr.name currency,
 					pay.gmail_id,
-					pay.description
+					pay.description,
+					pay.id_bank,
+					bank.name bank_name
                 FROM personal_bot.t_payments pay
                 INNER JOIN personal_bot.t_currencies curr
                     ON pay.currency_id = curr.id
+				INNER JOIN personal_bot.t_banks bank
+					ON pay.id_bank = bank.id
                 WHERE pay.user_id = $1
 				ORDER BY pay.last_updated DESC`
 
@@ -127,12 +153,16 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var payment Payment = Payment{}
+		var payment Payment = Payment{
+			Bank: &Bank{},
+		}
 		var tagsBody string = ""
 
-		if err := rows.Scan(&payment.Id, &payment.Amount, &payment.LastUpdated, &payment.DolarPrice, &tagsBody, &payment.Currency, &payment.GmailId, &payment.Description); err != nil {
+		if err := rows.Scan(&payment.Id, &payment.Amount, &payment.LastUpdated, &payment.DolarPrice, &tagsBody, &payment.Currency, &payment.GmailId, &payment.Description, &payment.IdBank, &payment.Bank.Name); err != nil {
 			return payments, err
 		}
+
+		payment.Bank.Id = *payment.IdBank
 
 		var tags []string = make([]string, 0)
 
@@ -148,4 +178,37 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 	}
 
 	return payments, nil
+}
+
+// GetBankByName returns a bank with the given name, using a local cache to avoid unnecessary database calls.
+func GetBankByName(name string) (*Bank, error) {
+	// First, try to get the bank from the cache.
+	if cached, ok := bankCache[name]; ok {
+		if cached.expiration.After(time.Now()) {
+			return cached.bank, nil
+		} else {
+			delete(bankCache, name)
+		}
+	}
+
+	// If the bank was not found in the cache, query the database.
+	statement := "SELECT id, name FROM personal_bot.t_banks WHERE name = $1"
+	var b Bank
+	err := db.GetConnection().QueryRow(statement, name).Scan(&b.Id, &b.Name)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("bank not found")
+	}
+
+	if err != nil {
+		logger.Error("Error querying bank by name", err.Error())
+		return nil, err
+	}
+
+	// Store the bank in the cache for future requests.
+	cacheItem := bankCacheItem{bank: &b, expiration: time.Now().Add(24 * time.Hour)}
+
+	bankCache[name] = cacheItem
+
+	return &b, nil
 }

@@ -38,6 +38,7 @@ var paymentTest *CreatePayment = &CreatePayment{
 	LastUpdated: "2022-03-27",
 	GmailId:     "12345",
 	Description: "test description",
+	IdBank:      1,
 }
 
 // Define test data
@@ -48,8 +49,10 @@ var paymentTest2 *Payment = &Payment{
 	Currency:    "USD",
 	DolarPrice:  1.0,
 	Tags:        []string{"food", "groceries"},
-	GmailId:     nil,
-	Description: nil,
+	GmailId:     &(&struct{ d string }{d: "abc"}).d,
+	Description: &(&struct{ d string }{d: "Hi"}).d,
+	IdBank:      &(&Bank{Id: 1}).Id,
+	Bank:        &Bank{Id: 1, Name: "Bank of America"},
 }
 
 func TestInsertPayment(t *testing.T) {
@@ -63,10 +66,10 @@ func TestInsertPayment(t *testing.T) {
 
 	// Expect the INSERT query with the test data arguments
 	mock.ExpectQuery(`INSERT INTO personal_bot.t_payments(
-                            amount, last_updated, user_id, currency_id, dolar_price, tags, gmail_id, description)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                        RETURNING id`).
-		WithArgs(paymentTest.Amount, paymentTest.LastUpdated, paymentTest.UserId, paymentTest.CurrencyId, paymentTest.DolarPrice, `[]`, paymentTest.GmailId, paymentTest.Description).
+						amount, last_updated, user_id, currency_id, dolar_price, tags, gmail_id, description, id_bank)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+					RETURNING id`).
+		WithArgs(paymentTest.Amount, paymentTest.LastUpdated, paymentTest.UserId, paymentTest.CurrencyId, paymentTest.DolarPrice, `[]`, paymentTest.GmailId, paymentTest.Description, paymentTest.IdBank).
 		WillReturnRows(rows)
 
 	// Call the function to be tested
@@ -102,25 +105,28 @@ func TestGetPaymentsByUserId(t *testing.T) {
 		WHERE u.id = $1`).
 		WithArgs(1).
 		WillReturnRows(userRows)
-
 	// We prepare the expected query result for the payments
-	rows := sqlmock.NewRows([]string{"payment_id", "amount", "last_updated", "dolar_price", "tags", "currency", "gmail_id", "description"}).
-		AddRow(paymentTest2.Id, paymentTest2.Amount, paymentTest2.LastUpdated, paymentTest2.DolarPrice, `["food","groceries"]`, paymentTest2.Currency, paymentTest2.GmailId, paymentTest2.Description)
+	rows := sqlmock.NewRows([]string{"payment_id", "amount", "last_updated", "dolar_price", "tags", "currency", "gmail_id", "description", "id_bank", "bank_name"}).
+		AddRow(paymentTest2.Id, paymentTest2.Amount, paymentTest2.LastUpdated, paymentTest2.DolarPrice, `["food","groceries"]`, paymentTest2.Currency, paymentTest2.GmailId, paymentTest2.Description, paymentTest2.Bank.Id, paymentTest2.Bank.Name)
 
 	mock.ExpectQuery(`SELECT 
-                        pay.id payment_id, 
-                        pay.amount, 
-                        pay.last_updated AT TIME ZONE 'UTC-6',
-                        pay.dolar_price,
-                        pay.tags,
-                        curr.name currency,
-                        pay.gmail_id,
-                        pay.description
-                    FROM personal_bot.t_payments pay
-                    INNER JOIN personal_bot.t_currencies curr
-                        ON pay.currency_id = curr.id
-                    WHERE pay.user_id = $1
-                    ORDER BY pay.last_updated DESC`).
+						pay.id payment_id, 
+						pay.amount, 
+						pay.last_updated AT TIME ZONE 'UTC-6',
+						pay.dolar_price,
+						pay.tags,
+						curr.name currency,
+						pay.gmail_id,
+						pay.description,
+						pay.id_bank,
+						bank.name bank_name
+					FROM personal_bot.t_payments pay
+					INNER JOIN personal_bot.t_currencies curr
+						ON pay.currency_id = curr.id
+					INNER JOIN personal_bot.t_banks bank
+						ON pay.id_bank = bank.id
+					WHERE pay.user_id = $1
+					ORDER BY pay.last_updated DESC`).
 		WithArgs(1).
 		WillReturnRows(rows)
 
@@ -132,6 +138,10 @@ func TestGetPaymentsByUserId(t *testing.T) {
 
 	if err != nil {
 		logger.TestError(tName, "Expectations Fullfilled", err.Error(), t)
+	}
+
+	if data.Payments[0] == nil {
+		logger.TestError(tName, "Payment created", "Payment not created", t)
 	}
 
 	if data.Payments[0].Id != 1 {

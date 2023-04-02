@@ -41,7 +41,8 @@ func TestBankBP_it_can_detect_payment_data(t *testing.T) {
 				Currency: &repositories.Currency{
 					Name: "USD",
 				},
-				Amount: 1.99,
+				Amount:   1.99,
+				BankName: "BP",
 			},
 		},
 		{
@@ -51,7 +52,8 @@ func TestBankBP_it_can_detect_payment_data(t *testing.T) {
 				Currency: &repositories.Currency{
 					Name: "CRC",
 				},
-				Amount: 4130,
+				Amount:   4130,
+				BankName: "BP",
 			},
 		},
 	}
@@ -69,6 +71,9 @@ func TestBankBP_it_can_detect_payment_data(t *testing.T) {
 		}
 		if got.Body != test.want.Body {
 			logger.TestError(tName, test.want.Body, got.Body, t)
+		}
+		if got.BankName != test.want.BankName {
+			logger.TestError(tName, test.want.BankName, got.BankName, t)
 		}
 	}
 }

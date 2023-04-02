@@ -37,7 +37,7 @@ type BAC struct {
 
 func extractEstablishmentName(str string) (string, error) {
 	// Define a regular expression to match the establishment name pattern
-	re := regexp.MustCompile(`(?s)<p>Comercio:<\/p>\s*</td>\s*<td[^>]*>\s*<p[^>]*>([^<]+)<\/p>`)
+	re := regexp.MustCompile(`(?s)<p>Comercio:<\/p>\s*<\/td>\s*<td[^>]*>\s*<p[^>]*>([^<]+)<\/p>`)
 
 	// Find the first match of the regular expression in the string
 	match := re.FindStringSubmatch(str)
@@ -78,6 +78,7 @@ func (bac BAC) getPayment(body string) *PaymentData {
 		Currency: &repositories.Currency{
 			Name: match[1],
 		},
-		Amount: num,
+		Amount:   num,
+		BankName: "BAC",
 	}
 }

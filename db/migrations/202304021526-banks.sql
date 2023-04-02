@@ -19,21 +19,13 @@ Under the following terms:
 You are free to use this work for personal or non-commercial purposes.
 If you would like to use this work for commercial purposes, please contact Juan Jose Vargas Fletes at juanvfletes@gmail.com.
 */
-package bank
+CREATE TABLE personal_bot.t_banks (
+    id SERIAL,
+    name TEXT NOT NULL
+);
 
-import "github.com/JuanVF/personal_bot/repositories"
+ALTER TABLE ONLY personal_bot.t_banks ADD CONSTRAINT t_banks_pkey PRIMARY KEY(id);
 
-type PaymentData struct {
-	Body     string
-	Currency *repositories.Currency
-	Amount   float64
-	BankName string
-}
+ALTER TABLE personal_bot.t_payments ADD COLUMN id_bank INT REFERENCES personal_bot.t_banks(id);
 
-type BankHandler interface {
-	getCRCValue() (float64, error)
-}
-
-type BankMatcher interface {
-	getPayment(body string) *PaymentData
-}
+INSERT INTO personal_bot.t_banks (name) VALUES ('BAC'), ('BN'), ('BP');
