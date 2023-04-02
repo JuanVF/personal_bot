@@ -20,7 +20,7 @@
 
 services:
   personal_bot:
-    image: personal_bot:0.0.1
+    image: personal_bot:0.0.2hf0.2
     depends_on:
       - personal_bot_db
     ports:

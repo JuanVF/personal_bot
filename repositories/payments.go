@@ -124,22 +124,22 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 	payments.User = user
 
 	statement := `SELECT 
-                    pay.id payment_id, 
-                    pay.amount, 
-                    pay.last_updated AT TIME ZONE 'UTC-6',
+					pay.id payment_id, 
+					pay.amount, 
+					pay.last_updated AT TIME ZONE 'UTC-6',
 					pay.dolar_price,
 					pay.tags,
-                    curr.name currency,
+					curr.name currency,
 					pay.gmail_id,
 					pay.description,
 					pay.id_bank,
-					bank.name bank_name
-                FROM personal_bot.t_payments pay
-                INNER JOIN personal_bot.t_currencies curr
-                    ON pay.currency_id = curr.id
-				INNER JOIN personal_bot.t_banks bank
+					COALESCE(bank.name, 'No Data Source Registered') bank_name
+				FROM personal_bot.t_payments pay
+				INNER JOIN personal_bot.t_currencies curr
+					ON pay.currency_id = curr.id
+				LEFT JOIN personal_bot.t_banks bank
 					ON pay.id_bank = bank.id
-                WHERE pay.user_id = $1
+				WHERE pay.user_id = $1
 				ORDER BY pay.last_updated DESC`
 
 	rows, err := db.GetConnection().Query(statement, userId)
@@ -162,7 +162,9 @@ func GetPaymentsByUserId(userId int) (*UserPayments, error) {
 			return payments, err
 		}
 
-		payment.Bank.Id = *payment.IdBank
+		if payment.IdBank != nil {
+			payment.Bank.Id = *payment.IdBank
+		}
 
 		var tags []string = make([]string, 0)
 
