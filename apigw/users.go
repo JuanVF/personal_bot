@@ -59,10 +59,17 @@ func (u UserRouter) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if fmt.Sprintf("%T", body["name"]) != "string" || fmt.Sprintf("%T", body["last_name"]) != "string" || fmt.Sprintf("%T", body["activity_level"]) != "string" {
+		http.Error(w, "Invalid Body", http.StatusBadRequest)
+		return
+	}
+
 	cuBody := &services.CreateUserBody{
 		IdToken:       body["id_token"].(string),
 		AccessToken:   token,
 		ActivityLevel: body["activity_level"].(string),
+		Name:          body["name"].(string),
+		LastName:      body["last_name"].(string),
 	}
 
 	resp := services.CreateUser(cuBody)

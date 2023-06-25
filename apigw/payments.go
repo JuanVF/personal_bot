@@ -36,6 +36,7 @@ type PaymentRouter struct {
 func (payment PaymentRouter) Handle() {
 	router.HandleFunc(fmt.Sprintf("%s/generate", payment.GetPrefix()), VerifyTokenMiddleware(payment.GeneratePayments)).Methods("POST")
 	router.HandleFunc(payment.GetPrefix(), VerifyTokenMiddleware(payment.GetPayments)).Methods("POST")
+	router.HandleFunc(fmt.Sprintf("%s/summary", payment.GetPrefix()), VerifyTokenMiddleware(payment.GetPaymentsSummary)).Methods("POST")
 }
 
 // Returns the payment prefix
@@ -77,6 +78,24 @@ func (payment PaymentRouter) GetPayments(w http.ResponseWriter, r *http.Request)
 	}
 
 	resp := services.GetPaymentsByTokenId(body)
+
+	writeResponse(w, resp)
+}
+
+// Returns the payments summary for a certain user using its token id
+func (payment PaymentRouter) GetPaymentsSummary(w http.ResponseWriter, r *http.Request) {
+	logger.Log("APIGW", "[POST] /payments/summary")
+
+	var body *services.GetPaymentsSummary = &services.GetPaymentsSummary{}
+
+	err := json.NewDecoder(r.Body).Decode(body)
+
+	if err != nil {
+		http.Error(w, "Invalid Body", http.StatusBadRequest)
+		return
+	}
+
+	resp := services.GetPaymentsSummaryByTokenId(body)
 
 	writeResponse(w, resp)
 }

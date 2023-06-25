@@ -35,6 +35,8 @@ type CreateUserBody struct {
 	AccessToken     string
 	ActivityLevel   string
 	ActivityLevelId int
+	Name            string
+	LastName        string
 }
 
 // Creates an user and its require data
@@ -47,7 +49,7 @@ func CreateUser(body *CreateUserBody) *common.Response {
 
 	body.ActivityLevelId = alId.Id
 
-	user, err := createUserByIdToken(body.IdToken, body.ActivityLevelId)
+	user, err := createUserByIdToken(body)
 
 	if err != nil {
 		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
@@ -63,8 +65,8 @@ func CreateUser(body *CreateUserBody) *common.Response {
 }
 
 // Creates an user by its ID Token
-func createUserByIdToken(idToken string, activityLevelId int) (*repositories.User, error) {
-	payload, err := google.GetPayloadFromIDToken(idToken)
+func createUserByIdToken(body *CreateUserBody) (*repositories.User, error) {
+	payload, err := google.GetPayloadFromIDToken(body.IdToken)
 
 	if err != nil {
 		return nil, fmt.Errorf("Invalid ID Token")
@@ -78,9 +80,9 @@ func createUserByIdToken(idToken string, activityLevelId int) (*repositories.Use
 
 	createUser := &repositories.CreateUserBody{
 		GoogleMe:        payload.Claims["email"].(string),
-		Name:            payload.Claims["given_name"].(string),
-		LastName:        payload.Claims["family_name"].(string),
-		ActivityLevelId: activityLevelId,
+		Name:            body.Name,
+		LastName:        body.LastName,
+		ActivityLevelId: body.ActivityLevelId,
 	}
 
 	userId, err := repositories.CreateUser(createUser)
@@ -92,9 +94,9 @@ func createUserByIdToken(idToken string, activityLevelId int) (*repositories.Use
 	return &repositories.User{
 		Id:              userId,
 		GoogleMe:        payload.Claims["email"].(string),
-		Name:            payload.Claims["given_name"].(string),
-		LastName:        payload.Claims["family_name"].(string),
-		ActivityLevelId: activityLevelId,
+		Name:            body.Name,
+		LastName:        body.LastName,
+		ActivityLevelId: body.ActivityLevelId,
 	}, nil
 }
 

@@ -41,6 +41,13 @@ type GetPaymentsBody struct {
 	IDToken string `json:"id_token"`
 }
 
+type GetPaymentsSummary struct {
+	IDToken string `json:"id_token"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Matcher string `json:"matcher"`
+}
+
 type ProcessPaymentPayload struct {
 	Mails *google.GmailThreads
 	Bot   *repositories.Bot
@@ -64,6 +71,38 @@ func GetPaymentsByTokenId(body *GetPaymentsBody) *common.Response {
 	payments, err := repositories.GetPaymentsByUserId(user.Id)
 
 	if err != nil {
+		return &common.Response{
+			Status: http.StatusInternalServerError,
+			Body: &common.ErrorResponse{
+				Message: "An error ocurred. Please try again",
+			},
+		}
+	}
+
+	return &common.Response{
+		Status: http.StatusOK,
+		Body:   payments,
+	}
+}
+
+// Returns the payments for an specific user
+func GetPaymentsSummaryByTokenId(body *GetPaymentsSummary) *common.Response {
+	user, err := getUserByIDToken(body.IDToken)
+
+	if err != nil {
+		return &common.Response{
+			Status: http.StatusBadRequest,
+			Body: &common.ErrorResponse{
+				Message: err.Error(),
+			},
+		}
+	}
+
+	payments, err := repositories.GetSummaryOfCertainPaymentsByDatesAndUserId(user.Id, body.Matcher, body.From, body.To)
+
+	if err != nil {
+		logger.Error("GetPaymentsSummaryByTokenId", err.Error())
+
 		return &common.Response{
 			Status: http.StatusInternalServerError,
 			Body: &common.ErrorResponse{

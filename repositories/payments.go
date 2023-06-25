@@ -53,6 +53,19 @@ type Payment struct {
 	Bank        *Bank
 }
 
+type PaymentSummary struct {
+	Month       string
+	TotalCount  int
+	TotalAmount float64
+	CurrencyId  int
+	Currency    *Currency
+}
+
+type UserPaymentsSummary struct {
+	User            *User
+	PaymentsSummary []*PaymentSummary
+}
+
 type Bank struct {
 	Id   int
 	Name string
@@ -105,6 +118,58 @@ func InsertPayments(payments []*CreatePayment) error {
 	}
 
 	return nil
+}
+
+// The GetSummaryOfCertainPaymentsByDatesAndUserId function retrieves a summary of payments based on the provided user ID,
+// matching criteria, and date range. It returns a UserPaymentsSummary object.
+func GetSummaryOfCertainPaymentsByDatesAndUserId(userId int, matcher string, from string, to string) (*UserPaymentsSummary, error) {
+	var payments *UserPaymentsSummary = &UserPaymentsSummary{
+		PaymentsSummary: make([]*PaymentSummary, 0),
+	}
+
+	user, err := GetUser(userId)
+
+	if err != nil {
+		logger.Error("Currencies Repository - Get Payments - Get Users", err.Error())
+
+		return nil, err
+	}
+
+	payments.User = user
+
+	statement := `SELECT DATE_TRUNC('month', last_updated) AS month,
+					COUNT(*) AS total_count,
+					SUM(amount) AS total_amount,
+					currency_id
+				FROM personal_bot.t_payments
+				WHERE description ~* $1
+				AND user_id = $2
+				AND last_updated >= $3::timestamptz
+				AND last_updated <= $4::timestamptz
+				GROUP BY DATE_TRUNC('month', last_updated), currency_id
+				ORDER BY DATE_TRUNC('month', last_updated);`
+
+	rows, err := db.GetConnection().Query(statement, matcher, userId, from, to)
+
+	if err != nil {
+		logger.Error("Payments Repository - Get Summary Of Certain Payments By Dates And User Id", err.Error())
+
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var payment PaymentSummary = PaymentSummary{}
+
+		if err := rows.Scan(&payment.Month, &payment.TotalCount, &payment.TotalAmount, &payment.CurrencyId); err != nil {
+			return payments, err
+		}
+
+		payments.PaymentsSummary = append(payments.PaymentsSummary, &payment)
+	}
+
+	return payments, nil
 }
 
 // Return all the payments made by an user in a date range
