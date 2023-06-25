@@ -20,7 +20,7 @@
 
 services:
   personal_bot:
-    image: personal_bot:0.0.2hf0.2
+    image: personal_bot:1.0.0
     depends_on:
       - personal_bot_db
     ports:
@@ -28,7 +28,7 @@ services:
     links:
       - "personal_bot_db:database"
   personal_bot_db:
-    image: personal_bot_db:0.0.1
+    image: personal_bot_db:1.0.0
     restart: always
     ports:
       - "5432:5432"

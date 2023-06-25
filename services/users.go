@@ -30,15 +30,30 @@ import (
 	"github.com/JuanVF/personal_bot/repositories"
 )
 
+type CreateUserBody struct {
+	IdToken         string
+	AccessToken     string
+	ActivityLevel   string
+	ActivityLevelId int
+}
+
 // Creates an user and its require data
-func CreateUser(idToken, accessToken string) *common.Response {
-	user, err := createUserByIdToken(idToken)
+func CreateUser(body *CreateUserBody) *common.Response {
+	alId, err := repositories.GetActivityLevelByName(body.ActivityLevel)
+
+	if err != nil {
+		return common.GetErrorResponse("Activity Level does not exists", http.StatusBadRequest)
+	}
+
+	body.ActivityLevelId = alId.Id
+
+	user, err := createUserByIdToken(body.IdToken, body.ActivityLevelId)
 
 	if err != nil {
 		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
 	}
 
-	err = createBotByUser(accessToken, user)
+	err = createBotByUser(body.AccessToken, user)
 
 	if err != nil {
 		return common.GetErrorResponse(err.Error(), http.StatusInternalServerError)
@@ -48,23 +63,24 @@ func CreateUser(idToken, accessToken string) *common.Response {
 }
 
 // Creates an user by its ID Token
-func createUserByIdToken(idToken string) (*repositories.User, error) {
+func createUserByIdToken(idToken string, activityLevelId int) (*repositories.User, error) {
 	payload, err := google.GetPayloadFromIDToken(idToken)
 
 	if err != nil {
 		return nil, fmt.Errorf("Invalid ID Token")
 	}
 
-	user, err := repositories.GetUserByGoogleMe(payload.Claims["email"].(string))
+	user, _ := repositories.GetUserByGoogleMe(payload.Claims["email"].(string))
 
 	if user != nil {
 		return nil, fmt.Errorf("This user is already registered in Personal Bot.")
 	}
 
 	createUser := &repositories.CreateUserBody{
-		GoogleMe: payload.Claims["email"].(string),
-		Name:     payload.Claims["given_name"].(string),
-		LastName: payload.Claims["family_name"].(string),
+		GoogleMe:        payload.Claims["email"].(string),
+		Name:            payload.Claims["given_name"].(string),
+		LastName:        payload.Claims["family_name"].(string),
+		ActivityLevelId: activityLevelId,
 	}
 
 	userId, err := repositories.CreateUser(createUser)
@@ -74,10 +90,11 @@ func createUserByIdToken(idToken string) (*repositories.User, error) {
 	}
 
 	return &repositories.User{
-		Id:       userId,
-		GoogleMe: payload.Claims["email"].(string),
-		Name:     payload.Claims["given_name"].(string),
-		LastName: payload.Claims["family_name"].(string),
+		Id:              userId,
+		GoogleMe:        payload.Claims["email"].(string),
+		Name:            payload.Claims["given_name"].(string),
+		LastName:        payload.Claims["family_name"].(string),
+		ActivityLevelId: activityLevelId,
 	}, nil
 }
 

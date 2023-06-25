@@ -35,7 +35,7 @@ type PaymentRouter struct {
 // Register all the payment routes
 func (payment PaymentRouter) Handle() {
 	router.HandleFunc(fmt.Sprintf("%s/generate", payment.GetPrefix()), VerifyTokenMiddleware(payment.GeneratePayments)).Methods("POST")
-	router.HandleFunc(fmt.Sprintf("%s", payment.GetPrefix()), VerifyTokenMiddleware(payment.GetPayments)).Methods("POST")
+	router.HandleFunc(payment.GetPrefix(), VerifyTokenMiddleware(payment.GetPayments)).Methods("POST")
 }
 
 // Returns the payment prefix

@@ -34,7 +34,7 @@ type UserFitnessRouter struct {
 
 // Register all the user fitness routes
 func (userFitness UserFitnessRouter) Handle() {
-	router.HandleFunc(fmt.Sprintf("%s", userFitness.GetPrefix()), VerifyTokenMiddleware(userFitness.SetUserFitnessGoal)).Methods("POST")
+	router.HandleFunc(userFitness.GetPrefix(), VerifyTokenMiddleware(userFitness.SetUserFitnessGoal)).Methods("POST")
 	router.HandleFunc(fmt.Sprintf("%s/diet", userFitness.GetPrefix()), VerifyTokenMiddleware(userFitness.GenerateDietPlan)).Methods("POST")
 }
 

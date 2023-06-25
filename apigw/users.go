@@ -35,7 +35,7 @@ type UserRouter struct {
 
 // Router Handler for user
 func (u UserRouter) Handle() {
-	router.HandleFunc(fmt.Sprintf("%s", u.GetPrefix()), VerifyTokenMiddleware(u.CreateUser)).Methods("POST")
+	router.HandleFunc(u.GetPrefix(), VerifyTokenMiddleware(u.CreateUser)).Methods("POST")
 	router.HandleFunc(fmt.Sprintf("%s/{id_token}", u.GetPrefix()), VerifyTokenMiddleware(u.GetData)).Methods("GET")
 }
 
@@ -59,7 +59,13 @@ func (u UserRouter) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := services.CreateUser(body["id_token"].(string), token)
+	cuBody := &services.CreateUserBody{
+		IdToken:       body["id_token"].(string),
+		AccessToken:   token,
+		ActivityLevel: body["activity_level"].(string),
+	}
+
+	resp := services.CreateUser(cuBody)
 
 	writeResponse(w, resp)
 }

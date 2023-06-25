@@ -35,7 +35,7 @@ type UserHealthRouter struct {
 
 // Register all the user health routes
 func (userHealth UserHealthRouter) Handle() {
-	router.HandleFunc(fmt.Sprintf("%s", userHealth.GetPrefix()), VerifyTokenMiddleware(userHealth.SetUserHealth)).Methods("POST")
+	router.HandleFunc(userHealth.GetPrefix(), VerifyTokenMiddleware(userHealth.SetUserHealth)).Methods("POST")
 	router.HandleFunc(fmt.Sprintf("%s/{id_token}", userHealth.GetPrefix()), VerifyTokenMiddleware(userHealth.GetUserHealth)).Methods("GET")
 }
 
