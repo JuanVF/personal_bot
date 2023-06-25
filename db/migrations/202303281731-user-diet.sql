@@ -25,7 +25,7 @@ CREATE TABLE personal_bot.t_walmart_invoice (
     amount numeric(10,2),
     invoice_date timestamp with time zone NOT NULL,
     items_purchased int,
-    gmail_id text NOT NULL,
+    gmail_id text NOT NULL
 );
 
 CREATE TABLE personal_bot.t_ingredients (
