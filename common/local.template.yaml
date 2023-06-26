@@ -1,5 +1,9 @@
 ---
 development:
+  aws:
+    ses:
+      sender : your_email@test.com
+      budget_template : budgetsnotifications
   google:
     oauth_url: https://oauth2.googleapis.com
     gmail_url: https://gmail.googleapis.com
@@ -27,6 +31,10 @@ development:
     dbname: postgres
     ssl_mode: disable
 container:
+  aws:
+    ses:
+      sender : your_email@test.com
+      budget_template : budgetsnotifications
   google:
     oauth_url: https://oauth2.googleapis.com
     gmail_url: https://gmail.googleapis.com
@@ -54,6 +62,10 @@ container:
     dbname: postgres
     ssl_mode: disable
 test:
+  aws:
+    ses:
+      sender : your_email@test.com
+      budget_template : budgetsnotifications
   google:
     oauth_url: https://oauth2.googleapis.com
     gmail_url: https://gmail.googleapis.com

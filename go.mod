@@ -11,6 +11,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.0 // indirect
 	github.com/antchfx/xmlquery v1.3.15 // indirect
 	github.com/antchfx/xpath v1.2.3 // indirect
+	github.com/aws/aws-sdk-go v1.44.289 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0 // indirect
@@ -19,6 +20,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/monaco-io/request v1.0.15 // indirect

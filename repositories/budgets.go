@@ -30,3 +30,32 @@ type Budget struct {
 	Matcher     string
 	LastUpdated string
 }
+
+// Query the budgets from an user by id
+func GetBudgetsByUserId(userId int) ([]*Budget, error) {
+	statement := "SELECT id, name, amount, matcher, last_updated FROM personal_bot.t_budgets WHERE user_id = $1"
+
+	rows, err := db.GetConnection().Query(statement, userId)
+
+	if err != nil {
+		logger.Error("Budget Repository - Get Budget By User Id", err.Error())
+
+		return []*Budget{}, err
+	}
+
+	defer rows.Close()
+
+	var budgets []*Budget = make([]*Budget, 0)
+
+	for rows.Next() {
+		var budget Budget
+
+		if err := rows.Scan(&budget.Id, &budget.Name, &budget.Amount, &budget.Matcher, &budget.LastUpdated); err != nil {
+			return budgets, err
+		}
+
+		budgets = append(budgets, &budget)
+	}
+
+	return budgets, nil
+}

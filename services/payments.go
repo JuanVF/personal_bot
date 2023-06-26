@@ -156,6 +156,12 @@ func GeneratePayments(body *GeneratePaymentsBody) *common.Response {
 		return common.GetErrorResponse("An error has ocurred while processing the payments. Please check your data and verify.", http.StatusInternalServerError)
 	}
 
+	err = CheckBudgetsByUserId(user.Id)
+
+	if err != nil {
+		logger.Error("Generate Payments", err.Error())
+	}
+
 	repositories.InsertPayments(payments)
 	repositories.UpdateBot(bot)
 

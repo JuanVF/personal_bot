@@ -37,3 +37,6 @@ server.key
 
 # IDE
 .idea/
+
+# Extra Data for Local Env
+data.csv

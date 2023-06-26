@@ -34,4 +34,8 @@ EXPOSE 443
 
 ENV ENVIRONMENT container
 
+ENV AWS_ACCESS_KEY_ID set_your_key_id_access_key
+ENV AWS_SECRET_ACCESS_KEY set_your_access_key
+
+
 CMD ["./main"]

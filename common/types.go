@@ -38,6 +38,16 @@ type Configuration struct {
 	Bot           BotConf           `yaml:"bot"`
 	PersonalBotDB PersonalBotDBConf `yaml:"personal_bot_db"`
 	OpenAI        OpenAIConfig      `yaml:"open_ai"`
+	AWS           AWS               `yaml:"aws"`
+}
+
+type AWS struct {
+	SES SES `yaml:"ses"`
+}
+
+type SES struct {
+	Sender         string `yaml:"sender"`
+	BudgetTemplate string `yaml:"budget_template"`
 }
 
 type OpenAIConfig struct {

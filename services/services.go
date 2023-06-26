@@ -25,6 +25,8 @@ import "github.com/JuanVF/personal_bot/common"
 
 var logger *common.Logger = common.GetLogger()
 
+var config *common.Configuration = common.GetConfig()
+
 var googleQuery string = "from:(bncontacto@bncr.fi.cr OR popularvisa@bancopopularinforma.fi.cr OR notificacion@notificacionesbaccr.com)"
 
 var walmartQuery string = "from:cr@mail1.gosocket.net"

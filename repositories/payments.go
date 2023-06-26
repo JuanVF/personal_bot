@@ -137,17 +137,19 @@ func GetSummaryOfCertainPaymentsByDatesAndUserId(userId int, matcher string, fro
 
 	payments.User = user
 
-	statement := `SELECT DATE_TRUNC('month', last_updated) AS month,
-					COUNT(*) AS total_count,
-					SUM(amount) AS total_amount,
-					currency_id
-				FROM personal_bot.t_payments
-				WHERE description ~* $1
-				AND user_id = $2
-				AND last_updated >= $3::timestamptz
-				AND last_updated <= $4::timestamptz
-				GROUP BY DATE_TRUNC('month', last_updated), currency_id
-				ORDER BY DATE_TRUNC('month', last_updated);`
+	statement := `SELECT DATE_TRUNC('month', p.last_updated) AS month,
+					COUNT(p.id) AS total_count,
+					SUM(p.amount) AS total_amount,
+					c.name
+				FROM personal_bot.t_payments p
+				INNER JOIN personal_bot.t_currencies c
+					ON p.currency_id = c.id
+				WHERE p.description ~* $1
+				AND p.user_id = $2
+				AND p.last_updated >= $3::timestamptz
+				AND p.last_updated <= $4::timestamptz
+				GROUP BY DATE_TRUNC('month', p.last_updated), c.name
+				ORDER BY DATE_TRUNC('month', p.last_updated);`
 
 	rows, err := db.GetConnection().Query(statement, matcher, userId, from, to)
 
@@ -160,9 +162,11 @@ func GetSummaryOfCertainPaymentsByDatesAndUserId(userId int, matcher string, fro
 	defer rows.Close()
 
 	for rows.Next() {
-		var payment PaymentSummary = PaymentSummary{}
+		var payment PaymentSummary = PaymentSummary{
+			Currency: &Currency{},
+		}
 
-		if err := rows.Scan(&payment.Month, &payment.TotalCount, &payment.TotalAmount, &payment.CurrencyId); err != nil {
+		if err := rows.Scan(&payment.Month, &payment.TotalCount, &payment.TotalAmount, &payment.Currency.Name); err != nil {
 			return payments, err
 		}
 
